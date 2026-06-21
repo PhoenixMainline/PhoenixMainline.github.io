@@ -1,0 +1,2394 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+<title>宇宙誓印覺醒工程·七印誓網</title>
+<style>
+/* ===== 全域重置與基礎 ===== */
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+:root {
+  --gold: #D4AF37;
+  --gold-light: #F0D060;
+  --gold-dim: #8B7020;
+  --purple-deep: #1A0A2E;
+  --purple-mid: #2D1B5E;
+  --purple-light: #4A2A8A;
+  --purple-glow: #6B3FA0;
+  --white: #F5F0FF;
+  --white-dim: rgba(245,240,255,0.7);
+  --cyan: #00E5FF;
+  --red-err: #FF4444;
+  --green-ok: #44FF88;
+  --font-main: 'Noto Serif TC', 'Noto Serif CJK TC', serif;
+  --font-mono: 'Courier New', monospace;
+  --transition: all 0.4s cubic-bezier(0.25, 0.46, 0.45, 0.94);
+}
+html, body {
+  width: 100%; height: 100%;
+  overflow: hidden;
+  background: var(--purple-deep);
+  color: var(--white);
+  font-family: var(--font-main);
+  font-size: 15px;
+  line-height: 1.7;
+}
+@import url('https://fonts.googleapis.com/css2?family=Noto+Serif+TC:wght@300;400;500;700;900&display=swap');
+
+/* ===== 星空粒子畫布 ===== */
+#cosmos-canvas {
+  position: fixed; top: 0; left: 0;
+  width: 100%; height: 100%;
+  z-index: 0; pointer-events: none;
+}
+
+/* ===== 主容器 ===== */
+#app {
+  position: relative; z-index: 1;
+  width: 100%; height: 100%;
+  display: flex; flex-direction: column;
+  overflow: hidden;
+}
+
+/* ===== 通用工具 ===== */
+.hidden { display: none !important; }
+.flex-center { display: flex; align-items: center; justify-content: center; }
+.flex-col { flex-direction: column; }
+.text-center { text-align: center; }
+.gold { color: var(--gold); }
+.gold-light { color: var(--gold-light); }
+.cyan { color: var(--cyan); }
+.green { color: var(--green-ok); }
+.red { color: var(--red-err); }
+
+/* ===== 金色光暈邊框 ===== */
+.gold-border {
+  border: 1px solid var(--gold-dim);
+  box-shadow: 0 0 12px rgba(212,175,55,0.2), inset 0 0 8px rgba(212,175,55,0.05);
+}
+.gold-border-glow {
+  border: 1px solid var(--gold);
+  box-shadow: 0 0 20px rgba(212,175,55,0.5), inset 0 0 15px rgba(212,175,55,0.1);
+}
+
+/* ===== 按鈕系統 ===== */
+.btn {
+  display: inline-flex; align-items: center; justify-content: center;
+  gap: 8px;
+  padding: 12px 24px;
+  border: none; border-radius: 4px;
+  font-family: var(--font-main); font-size: 15px; font-weight: 500;
+  cursor: pointer; transition: var(--transition);
+  position: relative; overflow: hidden;
+  letter-spacing: 1px;
+}
+.btn::before {
+  content: ''; position: absolute; top: 0; left: -100%;
+  width: 100%; height: 100%;
+  background: linear-gradient(90deg, transparent, rgba(255,255,255,0.1), transparent);
+  transition: left 0.5s;
+}
+.btn:hover::before { left: 100%; }
+.btn:active { transform: scale(0.97); }
+
+.btn-gold {
+  background: linear-gradient(135deg, #8B7020, #D4AF37, #F0D060, #D4AF37, #8B7020);
+  background-size: 200% 200%;
+  color: var(--purple-deep);
+  font-weight: 700;
+  animation: goldShimmer 3s ease infinite;
+}
+.btn-gold:hover {
+  box-shadow: 0 0 25px rgba(212,175,55,0.7);
+  transform: translateY(-2px);
+}
+@keyframes goldShimmer {
+  0%,100% { background-position: 0% 50%; }
+  50% { background-position: 100% 50%; }
+}
+
+.btn-outline {
+  background: transparent;
+  border: 1px solid var(--gold);
+  color: var(--gold);
+}
+.btn-outline:hover {
+  background: rgba(212,175,55,0.1);
+  box-shadow: 0 0 15px rgba(212,175,55,0.4);
+}
+
+.btn-purple {
+  background: linear-gradient(135deg, var(--purple-mid), var(--purple-light));
+  border: 1px solid var(--purple-glow);
+  color: var(--white);
+}
+.btn-purple:hover {
+  box-shadow: 0 0 20px rgba(107,63,160,0.6);
+}
+
+.btn-sm { padding: 8px 16px; font-size: 13px; }
+.btn-lg { padding: 16px 36px; font-size: 17px; }
+.btn-full { width: 100%; }
+.btn:disabled { opacity: 0.4; cursor: not-allowed; }
+.btn:disabled:hover { transform: none; box-shadow: none; }
+
+/* ===== 輸入框 ===== */
+.input-field {
+  width: 100%;
+  padding: 12px 16px;
+  background: rgba(45,27,94,0.6);
+  border: 1px solid var(--gold-dim);
+  border-radius: 4px;
+  color: var(--white);
+  font-family: var(--font-main); font-size: 14px;
+  outline: none; transition: var(--transition);
+  letter-spacing: 1px;
+}
+.input-field:focus {
+  border-color: var(--gold);
+  box-shadow: 0 0 15px rgba(212,175,55,0.3);
+  background: rgba(45,27,94,0.8);
+}
+.input-field::placeholder { color: rgba(212,175,55,0.4); }
+
+/* ===== 卡片 ===== */
+.card {
+  background: rgba(26,10,46,0.85);
+  backdrop-filter: blur(12px);
+  border-radius: 8px;
+  padding: 20px;
+}
+
+/* ===== 分隔線 ===== */
+.divider {
+  width: 100%; height: 1px;
+  background: linear-gradient(90deg, transparent, var(--gold-dim), transparent);
+  margin: 16px 0;
+}
+.divider-glow {
+  background: linear-gradient(90deg, transparent, var(--gold), transparent);
+  box-shadow: 0 0 8px rgba(212,175,55,0.5);
+}
+
+/* ===== 標題裝飾 ===== */
+.title-deco {
+  display: flex; align-items: center; gap: 12px;
+  margin-bottom: 8px;
+}
+.title-deco::before, .title-deco::after {
+  content: ''; flex: 1; height: 1px;
+  background: linear-gradient(90deg, transparent, var(--gold-dim));
+}
+.title-deco::after {
+  background: linear-gradient(90deg, var(--gold-dim), transparent);
+}
+
+/* ===== 徽章/標籤 ===== */
+.badge {
+  display: inline-flex; align-items: center;
+  padding: 3px 10px; border-radius: 20px;
+  font-size: 12px; font-weight: 500; letter-spacing: 1px;
+}
+.badge-gold { background: rgba(212,175,55,0.15); border: 1px solid var(--gold-dim); color: var(--gold); }
+.badge-green { background: rgba(68,255,136,0.1); border: 1px solid rgba(68,255,136,0.4); color: var(--green-ok); }
+.badge-red { background: rgba(255,68,68,0.1); border: 1px solid rgba(255,68,68,0.4); color: var(--red-err); }
+.badge-cyan { background: rgba(0,229,255,0.1); border: 1px solid rgba(0,229,255,0.4); color: var(--cyan); }
+.badge-gray { background: rgba(255,255,255,0.05); border: 1px solid rgba(255,255,255,0.2); color: var(--white-dim); }
+
+/* ===== 滾動容器 ===== */
+.scroll-area {
+  overflow-y: auto; overflow-x: hidden;
+  scrollbar-width: thin;
+  scrollbar-color: var(--gold-dim) transparent;
+}
+.scroll-area::-webkit-scrollbar { width: 4px; }
+.scroll-area::-webkit-scrollbar-track { background: transparent; }
+.scroll-area::-webkit-scrollbar-thumb { background: var(--gold-dim); border-radius: 2px; }
+
+/* ===== 脈衝動畫 ===== */
+@keyframes pulse {
+  0%,100% { opacity: 1; }
+  50% { opacity: 0.5; }
+}
+@keyframes pulseGlow {
+  0%,100% { box-shadow: 0 0 10px rgba(212,175,55,0.3); }
+  50% { box-shadow: 0 0 25px rgba(212,175,55,0.8), 0 0 50px rgba(212,175,55,0.3); }
+}
+@keyframes fadeInUp {
+  from { opacity: 0; transform: translateY(20px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+@keyframes fadeIn {
+  from { opacity: 0; }
+  to { opacity: 1; }
+}
+@keyframes slideInRight {
+  from { opacity: 0; transform: translateX(30px); }
+  to { opacity: 1; transform: translateX(0); }
+}
+@keyframes rotateSlow {
+  from { transform: rotate(0deg); }
+  to { transform: rotate(360deg); }
+}
+@keyframes scanLine {
+  0% { top: 0%; }
+  100% { top: 100%; }
+}
+@keyframes typewriter {
+  from { width: 0; }
+  to { width: 100%; }
+}
+@keyframes blink {
+  0%,100% { opacity: 1; }
+  50% { opacity: 0; }
+}
+
+/* ===== 載入動畫 ===== */
+.spinner {
+  width: 40px; height: 40px;
+  border: 2px solid rgba(212,175,55,0.2);
+  border-top-color: var(--gold);
+  border-radius: 50%;
+  animation: rotateSlow 0.8s linear infinite;
+}
+
+/* ===== 進度條 ===== */
+.progress-bar-wrap {
+  width: 100%; height: 6px;
+  background: rgba(212,175,55,0.1);
+  border-radius: 3px; overflow: hidden;
+}
+.progress-bar-fill {
+  height: 100%;
+  background: linear-gradient(90deg, var(--gold-dim), var(--gold), var(--gold-light));
+  border-radius: 3px;
+  transition: width 0.8s ease;
+  box-shadow: 0 0 8px rgba(212,175,55,0.5);
+}
+
+/* ===== 通知提示 ===== */
+#toast {
+  position: fixed; bottom: 80px; left: 50%;
+  transform: translateX(-50%) translateY(20px);
+  background: rgba(26,10,46,0.95);
+  border: 1px solid var(--gold);
+  border-radius: 6px;
+  padding: 10px 20px;
+  font-size: 14px; color: var(--gold);
+  z-index: 9999;
+  opacity: 0; transition: all 0.3s;
+  pointer-events: none;
+  white-space: nowrap;
+  box-shadow: 0 0 20px rgba(212,175,55,0.4);
+}
+#toast.show {
+  opacity: 1; transform: translateX(-50%) translateY(0);
+}
+
+/* ===== 模態框 ===== */
+.modal-overlay {
+  position: fixed; inset: 0;
+  background: rgba(10,5,20,0.85);
+  backdrop-filter: blur(6px);
+  z-index: 1000;
+  display: flex; align-items: center; justify-content: center;
+  padding: 20px;
+  animation: fadeIn 0.3s ease;
+}
+.modal-box {
+  background: linear-gradient(145deg, var(--purple-deep), var(--purple-mid));
+  border: 1px solid var(--gold);
+  border-radius: 12px;
+  padding: 28px 24px;
+  max-width: 420px; width: 100%;
+  box-shadow: 0 0 40px rgba(212,175,55,0.3);
+  animation: fadeInUp 0.4s ease;
+  max-height: 80vh;
+  overflow-y: auto;
+}
+.modal-title {
+  font-size: 18px; font-weight: 700;
+  color: var(--gold); text-align: center;
+  margin-bottom: 16px;
+  letter-spacing: 2px;
+}
+
+/* ===== 掃描動畫框 ===== */
+.scan-frame {
+  position: relative;
+  width: 200px; height: 200px;
+  border: 2px solid var(--gold);
+  border-radius: 8px;
+  overflow: hidden;
+  margin: 0 auto;
+  box-shadow: 0 0 20px rgba(212,175,55,0.4);
+}
+.scan-frame::before, .scan-frame::after {
+  content: ''; position: absolute;
+  width: 20px; height: 20px;
+  border-color: var(--gold-light);
+  border-style: solid;
+}
+.scan-frame::before { top: -1px; left: -1px; border-width: 3px 0 0 3px; }
+.scan-frame::after { bottom: -1px; right: -1px; border-width: 0 3px 3px 0; }
+.scan-line {
+  position: absolute; left: 0; right: 0;
+  height: 2px;
+  background: linear-gradient(90deg, transparent, var(--gold), transparent);
+  box-shadow: 0 0 10px var(--gold);
+  animation: scanLine 2s linear infinite;
+}
+.scan-placeholder {
+  width: 100%; height: 100%;
+  display: flex; align-items: center; justify-content: center;
+  background: rgba(26,10,46,0.8);
+  color: var(--gold-dim); font-size: 13px; text-align: center;
+  padding: 20px;
+}
+
+/* ===== 符文裝飾 ===== */
+.rune-deco {
+  font-size: 24px; color: var(--gold-dim);
+  animation: pulse 3s ease infinite;
+  letter-spacing: 8px;
+}
+
+/* ===== 狀態指示燈 ===== */
+.status-dot {
+  width: 8px; height: 8px;
+  border-radius: 50%;
+  display: inline-block;
+  margin-right: 6px;
+}
+.status-dot.active { background: var(--green-ok); box-shadow: 0 0 6px var(--green-ok); animation: pulse 2s infinite; }
+.status-dot.inactive { background: var(--red-err); }
+.status-dot.pending { background: var(--gold); animation: pulse 1.5s infinite; }
+
+/* ===== 六芒星裝飾 ===== */
+.hexagram {
+  display: inline-block;
+  position: relative;
+  width: 60px; height: 60px;
+  animation: rotateSlow 20s linear infinite;
+}
+
+/* ===== 響應式行動裝置 ===== */
+@media (max-width: 480px) {
+  .btn-lg { padding: 14px 28px; font-size: 15px; }
+  .modal-box { padding: 20px 16px; }
+}
+</style>
+</head>
+<body>
+
+<!-- 星空粒子背景 -->
+<canvas id="cosmos-canvas"></canvas>
+
+<!-- Toast 通知 -->
+<div id="toast"></div>
+
+<!-- 主應用容器 -->
+<div id="app">
+  <!-- 第一階段：啟動流程 -->
+  <div id="phase-launch" class="flex-center flex-col" style="flex:1; overflow:hidden;">
+    <!-- 步驟容器 -->
+    <div id="launch-steps" style="width:100%; height:100%; position:relative; overflow:hidden;"></div>
+  </div>
+
+  <!-- 第二階段：主系統 -->
+  <div id="phase-main" class="hidden" style="flex:1; display:flex; flex-direction:column; overflow:hidden;">
+    <!-- 頂部標題欄 -->
+    <div id="main-header" style="
+      padding: 12px 20px 10px;
+      background: linear-gradient(180deg, rgba(26,10,46,0.98) 0%, rgba(26,10,46,0.85) 100%);
+      border-bottom: 1px solid var(--gold-dim);
+      flex-shrink: 0;
+    ">
+      <div style="text-align:center;">
+        <div class="rune-deco" style="font-size:14px; letter-spacing:4px; margin-bottom:2px;">✦ ✧ ✦</div>
+        <div style="font-size:13px; color:var(--gold); font-weight:700; letter-spacing:3px;">宇宙誓印覺醒工程</div>
+        <div style="font-size:11px; color:var(--gold-dim); letter-spacing:2px;">七印誓網主系統</div>
+      </div>
+    </div>
+
+    <!-- 頁籤內容區 -->
+    <div id="tab-content" class="scroll-area" style="flex:1; overflow-y:auto; padding: 0;"></div>
+
+    <!-- 底部導航 -->
+    <div id="bottom-nav" style="
+      display: flex;
+      background: rgba(26,10,46,0.97);
+      border-top: 1px solid var(--gold-dim);
+      flex-shrink: 0;
+      padding-bottom: env(safe-area-inset-bottom, 0px);
+    ">
+    </div>
+  </div>
+</div>
+
+<!-- 模態框容器 -->
+<div id="modal-container"></div>
+
+<script>
+// ============================================================
+// 星空粒子系統
+// ============================================================
+(function initCosmos() {
+  const canvas = document.getElementById('cosmos-canvas');
+  const ctx = canvas.getContext('2d');
+  let W, H, stars = [], nebulas = [], lines = [];
+  const STAR_COUNT = 200;
+  const NEBULA_COUNT = 5;
+  const LINE_COUNT = 30;
+
+  function resize() {
+    W = canvas.width = window.innerWidth;
+    H = canvas.height = window.innerHeight;
+  }
+
+  function randomStar() {
+    return {
+      x: Math.random() * W,
+      y: Math.random() * H,
+      r: Math.random() * 1.5 + 0.3,
+      alpha: Math.random() * 0.8 + 0.2,
+      speed: Math.random() * 0.3 + 0.05,
+      twinkle: Math.random() * Math.PI * 2,
+      twinkleSpeed: Math.random() * 0.02 + 0.005,
+      color: Math.random() > 0.85 ? '#D4AF37' : Math.random() > 0.7 ? '#00E5FF' : '#F5F0FF'
+    };
+  }
+
+  function randomNebula() {
+    return {
+      x: Math.random() * W,
+      y: Math.random() * H,
+      r: Math.random() * 150 + 80,
+      alpha: Math.random() * 0.06 + 0.02,
+      hue: Math.random() > 0.5 ? '107,63,160' : '212,175,55',
+      drift: (Math.random() - 0.5) * 0.1
+    };
+  }
+
+  function randomLine() {
+    const x1 = Math.random() * W, y1 = Math.random() * H;
+    const angle = Math.random() * Math.PI * 2;
+    const len = Math.random() * 80 + 30;
+    return {
+      x1, y1,
+      x2: x1 + Math.cos(angle) * len,
+      y2: y1 + Math.sin(angle) * len,
+      alpha: Math.random() * 0.15 + 0.03,
+      pulse: Math.random() * Math.PI * 2,
+      pulseSpeed: Math.random() * 0.01 + 0.003
+    };
+  }
+
+  function init() {
+    resize();
+    stars = Array.from({length: STAR_COUNT}, randomStar);
+    nebulas = Array.from({length: NEBULA_COUNT}, randomNebula);
+    lines = Array.from({length: LINE_COUNT}, randomLine);
+  }
+
+  function draw(t) {
+    ctx.clearRect(0, 0, W, H);
+
+    // 深空漸層背景
+    const bg = ctx.createRadialGradient(W/2, H/2, 0, W/2, H/2, Math.max(W,H)*0.7);
+    bg.addColorStop(0, 'rgba(42,20,80,0.4)');
+    bg.addColorStop(0.5, 'rgba(26,10,46,0.3)');
+    bg.addColorStop(1, 'rgba(10,5,20,0.5)');
+    ctx.fillStyle = bg;
+    ctx.fillRect(0, 0, W, H);
+
+    // 星雲
+    nebulas.forEach(n => {
+      n.x += n.drift;
+      if (n.x > W + n.r) n.x = -n.r;
+      if (n.x < -n.r) n.x = W + n.r;
+      const grad = ctx.createRadialGradient(n.x, n.y, 0, n.x, n.y, n.r);
+      grad.addColorStop(0, `rgba(${n.hue},${n.alpha})`);
+      grad.addColorStop(1, 'rgba(0,0,0,0)');
+      ctx.fillStyle = grad;
+      ctx.beginPath();
+      ctx.arc(n.x, n.y, n.r, 0, Math.PI * 2);
+      ctx.fill();
+    });
+
+    // 光網線條
+    lines.forEach(l => {
+      l.pulse += l.pulseSpeed;
+      const a = l.alpha * (0.5 + 0.5 * Math.sin(l.pulse));
+      ctx.strokeStyle = `rgba(212,175,55,${a})`;
+      ctx.lineWidth = 0.5;
+      ctx.beginPath();
+      ctx.moveTo(l.x1, l.y1);
+      ctx.lineTo(l.x2, l.y2);
+      ctx.stroke();
+    });
+
+    // 星星
+    stars.forEach(s => {
+      s.twinkle += s.twinkleSpeed;
+      s.y -= s.speed * 0.1;
+      if (s.y < -2) { s.y = H + 2; s.x = Math.random() * W; }
+      const a = s.alpha * (0.6 + 0.4 * Math.sin(s.twinkle));
+      ctx.fillStyle = s.color.replace(')', `,${a})`).replace('rgb', 'rgba').replace('#F5F0FF', `rgba(245,240,255,${a})`).replace('#D4AF37', `rgba(212,175,55,${a})`).replace('#00E5FF', `rgba(0,229,255,${a})`);
+
+      // 簡化：直接用 fillStyle
+      ctx.globalAlpha = a;
+      ctx.fillStyle = s.color;
+      ctx.beginPath();
+      ctx.arc(s.x, s.y, s.r, 0, Math.PI * 2);
+      ctx.fill();
+
+      // 金色星星加光暈
+      if (s.color === '#D4AF37' && s.r > 1) {
+        ctx.globalAlpha = a * 0.3;
+        ctx.fillStyle = '#D4AF37';
+        ctx.beginPath();
+        ctx.arc(s.x, s.y, s.r * 3, 0, Math.PI * 2);
+        ctx.fill();
+      }
+      ctx.globalAlpha = 1;
+    });
+
+    requestAnimationFrame(draw);
+  }
+
+  window.addEventListener('resize', () => { resize(); nebulas = Array.from({length: NEBULA_COUNT}, randomNebula); });
+  init();
+  requestAnimationFrame(draw);
+})();
+
+// ============================================================
+// 工具函數
+// ============================================================
+function showToast(msg, duration = 2500) {
+  const t = document.getElementById('toast');
+  t.textContent = msg;
+  t.classList.add('show');
+  setTimeout(() => t.classList.remove('show'), duration);
+}
+
+function showModal(html, onClose) {
+  const container = document.getElementById('modal-container');
+  container.innerHTML = `
+    <div class="modal-overlay" id="modal-overlay">
+      <div class="modal-box">${html}</div>
+    </div>`;
+  if (onClose) {
+    document.getElementById('modal-overlay').addEventListener('click', e => {
+      if (e.target.id === 'modal-overlay') { closeModal(); if(onClose) onClose(); }
+    });
+  }
+}
+
+function closeModal() {
+  document.getElementById('modal-container').innerHTML = '';
+}
+
+function sleep(ms) { return new Promise(r => setTimeout(r, ms)); }
+
+function animateIn(el, delay = 0) {
+  el.style.opacity = '0';
+  el.style.transform = 'translateY(16px)';
+  setTimeout(() => {
+    el.style.transition = 'opacity 0.5s ease, transform 0.5s ease';
+    el.style.opacity = '1';
+    el.style.transform = 'translateY(0)';
+  }, delay);
+}
+
+// ============================================================
+// 應用狀態
+// ============================================================
+const AppState = {
+  currentStep: 1,
+  qrScanned: false,
+  oathRead: false,
+  isbnVerified: false,
+  isbn: 'ISBN 978-988-9**10-1-1',
+  userName: '誓印者',
+  oathName: '光明誓魂',
+  uid: 'SW-2024-0621-7777',
+  currentTab: 0,
+  sealStatus: ['passed', 'active', 'pending', 'pending', 'pending', 'pending', 'pending'],
+  seals: [
+    { name: '消業印', desc: '消除業障，清淨誓魂根基', num: '第一印' },
+    { name: '修心印', desc: '修煉心性，強化誓魂意志', num: '第二印' },
+    { name: '守願印', desc: '守護誓願，鞏固誓魂方向', num: '第三印' },
+    { name: '誓令印', desc: '確立誓令，啟動誓魂使命', num: '第四印' },
+    { name: '覺醒印', desc: '全面覺醒，誓魂本質顯化', num: '第五印' },
+    { name: '誥徒誓印', desc: '誥授誓徒，傳承誓魂法脈', num: '第六印' },
+    { name: '鳳徽印', desc: '圓印封冊，誓魂歸源完成', num: '第七印' }
+  ]
+};
+
+// ============================================================
+// 第一階段：啟動流程
+// ============================================================
+function renderLaunchPhase() {
+  const container = document.getElementById('launch-steps');
+  renderStep(AppState.currentStep, container);
+}
+
+function renderStep(step, container) {
+  container.innerHTML = '';
+  const stepFns = [null, renderStep1, renderStep2, renderStep3, renderStep4, renderStep5];
+  if (stepFns[step]) stepFns[step](container);
+}
+
+function goToStep(n) {
+  AppState.currentStep = n;
+  renderStep(n, document.getElementById('launch-steps'));
+}
+
+// ===== 步驟一：啟動條件 =====
+function renderStep1(container) {
+  container.innerHTML = `
+    <div class="scroll-area" style="height:100%; padding:24px 20px;">
+      <div style="max-width:480px; margin:0 auto;">
+        <div style="text-align:center; margin-bottom:24px; animation: fadeInUp 0.6s ease;">
+          <div class="rune-deco" style="font-size:20px; margin-bottom:12px;">✦ ✧ ✦ ✧ ✦</div>
+          <div style="font-size:22px; font-weight:900; color:var(--gold); letter-spacing:3px; line-height:1.4;">
+            宇宙誓印覺醒工程
+          </div>
+          <div style="font-size:16px; color:var(--gold-light); letter-spacing:4px; margin-top:4px;">七印誓網</div>
+          <div class="divider divider-glow" style="margin:16px 0;"></div>
+          <div style="font-size:13px; color:var(--gold-dim); letter-spacing:2px;">全球啟動流程 · 步驟一</div>
+          <div style="font-size:18px; font-weight:700; color:var(--white); margin-top:8px; letter-spacing:2px;">啟動條件確認</div>
+        </div>
+
+        <div class="card gold-border" style="margin-bottom:16px; animation: fadeInUp 0.6s ease 0.1s both;">
+          <div style="font-size:14px; color:var(--gold); font-weight:700; margin-bottom:14px; letter-spacing:2px;">
+            ◈ 啟動前置條件檢查清單
+          </div>
+          <div id="checklist" style="display:flex; flex-direction:column; gap:12px;">
+            <label class="checklist-item" style="display:flex; align-items:flex-start; gap:12px; cursor:pointer;">
+              <input type="checkbox" id="check1" style="margin-top:3px; accent-color:var(--gold); width:16px; height:16px; cursor:pointer;">
+              <div>
+                <div style="font-size:14px; color:var(--white); font-weight:500;">已完成驗證之購書序號誓導碼</div>
+                <div style="font-size:12px; color:var(--white-dim); margin-top:2px;">請確認持有有效之購書序號誓導碼，並已完成初步驗證程序</div>
+              </div>
+            </label>
+            <div class="divider" style="margin:4px 0;"></div>
+            <label class="checklist-item" style="display:flex; align-items:flex-start; gap:12px; cursor:pointer;">
+              <input type="checkbox" id="check2" style="margin-top:3px; accent-color:var(--gold); width:16px; height:16px; cursor:pointer;">
+              <div>
+                <div style="font-size:14px; color:var(--white); font-weight:500;">穩定網路環境</div>
+                <div style="font-size:12px; color:var(--white-dim); margin-top:2px;">請確認裝置處於穩定網路連線狀態，以確保誓印同步完整性</div>
+              </div>
+            </label>
+          </div>
+        </div>
+
+        <div class="card gold-border" style="margin-bottom:20px; animation: fadeInUp 0.6s ease 0.2s both;">
+          <div style="font-size:14px; color:var(--gold); font-weight:700; margin-bottom:14px; letter-spacing:2px;">
+            ◈ 掃描書封底 QR Code
+          </div>
+          <div style="text-align:center; margin-bottom:16px;">
+            <div class="scan-frame">
+              <div class="scan-placeholder">
+                <div>
+                  <div style="font-size:28px; margin-bottom:8px;">📷</div>
+                  <div>對準書封底<br>QR Code</div>
+                </div>
+              </div>
+              <div class="scan-line"></div>
+            </div>
+          </div>
+          <button class="btn btn-gold btn-full" onclick="simulateQRScan('book')">
+            ◉ 掃描書封底 QR Code
+          </button>
+          <div id="qr-result" style="margin-top:10px; text-align:center; font-size:13px; color:var(--green-ok); display:none;">
+            ✓ QR Code 掃描完成，書冊識別成功
+          </div>
+        </div>
+
+        <button class="btn btn-gold btn-full btn-lg" id="step1-next" onclick="checkStep1()" style="animation: fadeInUp 0.6s ease 0.3s both;">
+          進入下一步驟 →
+        </button>
+        <div style="text-align:center; margin-top:12px; font-size:12px; color:var(--gold-dim);">
+          步驟 1 / 5
+        </div>
+      </div>
+    </div>`;
+
+  // 勾選框動態效果
+  ['check1','check2'].forEach(id => {
+    document.getElementById(id).addEventListener('change', function() {
+      this.closest('label').style.background = this.checked ? 'rgba(212,175,55,0.05)' : '';
+      this.closest('label').style.borderRadius = '4px';
+      this.closest('label').style.padding = this.checked ? '8px' : '';
+    });
+  });
+}
+
+function simulateQRScan(type) {
+  showModal(`
+    <div style="text-align:center;">
+      <div class="modal-title">◉ QR Code 掃描中</div>
+      <div class="scan-frame" style="margin:0 auto 20px;">
+        <div class="scan-placeholder">
+          <div>
+            <div style="font-size:28px; margin-bottom:8px;">📷</div>
+            <div style="font-size:12px;">模擬掃描中...</div>
+          </div>
+        </div>
+        <div class="scan-line"></div>
+      </div>
+      <div style="font-size:13px; color:var(--white-dim); margin-bottom:16px;">請將鏡頭對準 QR Code</div>
+      <button class="btn btn-gold btn-full" onclick="completeScan('${type}')">模擬掃描成功</button>
+      <button class="btn btn-outline btn-full" style="margin-top:8px;" onclick="closeModal()">取消</button>
+    </div>`);
+}
+
+function completeScan(type) {
+  closeModal();
+  if (type === 'book') {
+    AppState.qrScanned = true;
+    const result = document.getElementById('qr-result');
+    if (result) { result.style.display = 'block'; }
+    showToast('✓ 書封底 QR Code 掃描成功');
+  } else if (type === 'oath') {
+    const result = document.getElementById('oath-qr-result');
+    if (result) { result.style.display = 'block'; }
+    showToast('✓ 誓導 QR Code 掃描成功');
+  }
+}
+
+function checkStep1() {
+  const c1 = document.getElementById('check1').checked;
+  const c2 = document.getElementById('check2').checked;
+  if (!c1 || !c2) {
+    showToast('⚠ 請確認完成所有前置條件勾選');
+    return;
+  }
+  goToStep(2);
+}
+
+// ===== 步驟二：授權誓讀 =====
+function renderStep2(container) {
+  let counting = false;
+  let timeLeft = 10;
+  let timer = null;
+
+  container.innerHTML = `
+    <div class="scroll-area" style="height:100%; padding:24px 20px;">
+      <div style="max-width:480px; margin:0 auto;">
+        <div style="text-align:center; margin-bottom:20px; animation: fadeInUp 0.6s ease;">
+          <div class="rune-deco" style="font-size:16px; margin-bottom:10px;">✦ ✧ ✦ ✧ ✦</div>
+          <div style="font-size:13px; color:var(--gold-dim); letter-spacing:2px;">全球啟動流程 · 步驟二</div>
+          <div style="font-size:18px; font-weight:700; color:var(--white); margin-top:6px; letter-spacing:2px;">授權誓讀（主頻啟令）</div>
+        </div>
+
+        <div class="card gold-border-glow" style="margin-bottom:20px; text-align:center; padding:28px 20px; animation: fadeInUp 0.6s ease 0.1s both; position:relative; overflow:hidden;">
+          <div style="position:absolute; top:0; left:0; right:0; height:2px; background:linear-gradient(90deg, transparent, var(--gold), transparent); animation: pulse 2s infinite;"></div>
+          <div style="font-size:12px; color:var(--gold-dim); letter-spacing:3px; margin-bottom:16px;">◈ 主頻啟令誓文 ◈</div>
+          <div style="
+            font-size:16px; color:var(--gold-light);
+            line-height:2; font-weight:500;
+            letter-spacing:2px;
+            padding:16px;
+            background:rgba(212,175,55,0.05);
+            border-radius:6px;
+            border-left:3px solid var(--gold);
+            text-align:left;
+          ">
+            ★吾以誓魂應律，<br>
+            主頻啟、書命立、印軌定，<br>
+            天地為鑑，光網為證。★
+          </div>
+          <div style="position:absolute; bottom:0; left:0; right:0; height:2px; background:linear-gradient(90deg, transparent, var(--gold), transparent); animation: pulse 2s infinite 1s;"></div>
+        </div>
+
+        <div class="card gold-border" style="margin-bottom:20px; animation: fadeInUp 0.6s ease 0.2s both;">
+          <div style="font-size:14px; color:var(--gold); font-weight:700; margin-bottom:14px; letter-spacing:2px; text-align:center;">
+            ◈ 靜心誦讀
+          </div>
+          <div style="text-align:center; margin-bottom:16px;">
+            <div id="timer-display" style="
+              font-size:48px; font-weight:900; color:var(--gold);
+              font-family:var(--font-mono);
+              text-shadow: 0 0 20px rgba(212,175,55,0.6);
+              margin-bottom:8px;
+            ">10</div>
+            <div style="font-size:13px; color:var(--white-dim);">秒</div>
+          </div>
+          <button class="btn btn-purple btn-full" id="timer-btn" onclick="startTimer()">
+            ◎ 靜心 10 秒
+          </button>
+          <div id="confirm-read-wrap" style="margin-top:12px; display:none;">
+            <button class="btn btn-gold btn-full" onclick="confirmOathRead()">
+              ✓ 確認已誦讀
+            </button>
+          </div>
+        </div>
+
+        <button class="btn btn-outline btn-full" style="margin-bottom:8px; animation: fadeInUp 0.6s ease 0.3s both;" onclick="goToStep(1)">
+          ← 返回上一步
+        </button>
+        <div style="text-align:center; margin-top:8px; font-size:12px; color:var(--gold-dim);">
+          步驟 2 / 5
+        </div>
+      </div>
+    </div>`;
+
+  window._startTimer = function() {
+    if (counting) return;
+    counting = true;
+    timeLeft = 10;
+    const btn = document.getElementById('timer-btn');
+    const display = document.getElementById('timer-display');
+    btn.disabled = true;
+    btn.textContent = '靜心中...';
+
+    timer = setInterval(() => {
+      timeLeft--;
+      if (display) display.textContent = timeLeft;
+      if (timeLeft <= 0) {
+        clearInterval(timer);
+        if (display) {
+          display.textContent = '✓';
+          display.style.color = 'var(--green-ok)';
+        }
+        if (btn) { btn.textContent = '靜心完成'; }
+        const wrap = document.getElementById('confirm-read-wrap');
+        if (wrap) wrap.style.display = 'block';
+        showToast('靜心完成，請確認誦讀');
+      }
+    }, 1000);
+  };
+  window.startTimer = window._startTimer;
+}
+
+function confirmOathRead() {
+  AppState.oathRead = true;
+  showToast('✓ 誓文已確認誦讀');
+  goToStep(3);
+}
+
+// ===== 步驟三：授權綁定 =====
+function renderStep3(container) {
+  container.innerHTML = `
+    <div class="scroll-area" style="height:100%; padding:24px 20px;">
+      <div style="max-width:480px; margin:0 auto;">
+        <div style="text-align:center; margin-bottom:20px; animation: fadeInUp 0.6s ease;">
+          <div class="rune-deco" style="font-size:16px; margin-bottom:10px;">✦ ✧ ✦ ✧ ✦</div>
+          <div style="font-size:13px; color:var(--gold-dim); letter-spacing:2px;">全球啟動流程 · 步驟三</div>
+          <div style="font-size:18px; font-weight:700; color:var(--white); margin-top:6px; letter-spacing:2px;">授權綁定（母源印驗證）</div>
+        </div>
+
+        <div class="card gold-border" style="margin-bottom:16px; animation: fadeInUp 0.6s ease 0.1s both;">
+          <div style="font-size:14px; color:var(--gold); font-weight:700; margin-bottom:14px; letter-spacing:2px;">
+            ◈ 掃描【誓導 QR Code】
+          </div>
+          <div style="text-align:center; margin-bottom:14px;">
+            <div class="scan-frame">
+              <div class="scan-placeholder">
+                <div>
+                  <div style="font-size:28px; margin-bottom:8px;">📷</div>
+                  <div>對準誓導<br>QR Code</div>
+                </div>
+              </div>
+              <div class="scan-line"></div>
+            </div>
+          </div>
+          <button class="btn btn-outline btn-full" onclick="simulateQRScan('oath')">
+            ◉ 掃描【誓導 QR Code】
+          </button>
+          <div id="oath-qr-result" style="margin-top:10px; text-align:center; font-size:13px; color:var(--green-ok); display:none;">
+            ✓ 誓導 QR Code 掃描完成
+          </div>
+        </div>
+
+        <div class="card gold-border" style="margin-bottom:16px; animation: fadeInUp 0.6s ease 0.15s both;">
+          <div style="font-size:14px; color:var(--gold); font-weight:700; margin-bottom:14px; letter-spacing:2px;">
+            ◈ 輸入購書序號
+          </div>
+          <div style="font-size:12px; color:var(--white-dim); margin-bottom:8px; line-height:1.6;">
+            格式範例：<span style="color:var(--gold-light); font-family:var(--font-mono);">ISBN 978-988-9**10-1-1</span>
+          </div>
+          <input type="text" class="input-field" id="isbn-input"
+            placeholder="請輸入購書序號（如：ISBN 978-988-9**10-1-1）"
+            value="">
+          <div style="
+            margin-top:10px; padding:10px 12px;
+            background:rgba(212,175,55,0.05);
+            border-radius:4px; border-left:2px solid var(--gold-dim);
+            font-size:12px; color:var(--white-dim); line-height:1.8;
+          ">
+            <div style="color:var(--gold); font-weight:600; margin-bottom:4px;">⚠ 重要提示</div>
+            完整輸入示範：<span style="color:var(--gold-light); font-family:var(--font-mono);">ISBN 978-988-9**10-1-1</span><br>
+            僅輸入購書序號，<span style="color:var(--red-err);">不可增刪符號</span>，請嚴格依照格式輸入。
+          </div>
+        </div>
+
+        <button class="btn btn-gold btn-full btn-lg" onclick="submitVerification()" style="margin-bottom:12px; animation: fadeInUp 0.6s ease 0.2s both;">
+          ◉ 送出驗證
+        </button>
+        <button class="btn btn-outline btn-full" onclick="goToStep(2)" style="animation: fadeInUp 0.6s ease 0.25s both;">
+          ← 返回上一步
+        </button>
+        <div style="text-align:center; margin-top:12px; font-size:12px; color:var(--gold-dim);">
+          步驟 3 / 5
+        </div>
+      </div>
+    </div>`;
+}
+
+function submitVerification() {
+  const input = document.getElementById('isbn-input').value.trim();
+  if (!input) {
+    showToast('⚠ 請輸入購書序號');
+    return;
+  }
+  AppState.isbn = input || 'ISBN 978-988-9**10-1-1';
+
+  // 顯示驗證中動畫
+  showModal(`
+    <div style="text-align:center; padding:20px 0;">
+      <div class="modal-title">◉ 母源印驗證中</div>
+      <div style="display:flex; justify-content:center; margin:20px 0;">
+        <div class="spinner" style="width:60px; height:60px;"></div>
+      </div>
+      <div style="font-size:13px; color:var(--white-dim); margin-bottom:8px;">正在進行誓印對頻驗證...</div>
+      <div id="verify-progress" style="font-size:12px; color:var(--gold-dim);">連接主頻中...</div>
+    </div>`);
+
+  const msgs = ['連接主頻中...', '校驗母源印記...', '比對誓導碼...', '驗證購書序號...', '回傳驗證結果...'];
+  let i = 0;
+  const interval = setInterval(() => {
+    const el = document.getElementById('verify-progress');
+    if (el && i < msgs.length) el.textContent = msgs[i++];
+    if (i >= msgs.length) {
+      clearInterval(interval);
+      setTimeout(() => {
+        closeModal();
+        AppState.isbnVerified = true;
+        goToStep(4);
+      }, 600);
+    }
+  }, 500);
+}
+
+// ===== 步驟四：回傳結果 =====
+function renderStep4(container) {
+  const success = AppState.isbnVerified;
+
+  container.innerHTML = `
+    <div class="scroll-area" style="height:100%; padding:24px 20px;">
+      <div style="max-width:480px; margin:0 auto;">
+        <div style="text-align:center; margin-bottom:20px; animation: fadeInUp 0.6s ease;">
+          <div class="rune-deco" style="font-size:16px; margin-bottom:10px;">✦ ✧ ✦ ✧ ✦</div>
+          <div style="font-size:13px; color:var(--gold-dim); letter-spacing:2px;">全球啟動流程 · 步驟四</div>
+          <div style="font-size:18px; font-weight:700; color:var(--white); margin-top:6px; letter-spacing:2px;">回傳結果</div>
+        </div>
+
+        ${success ? `
+        <div class="card gold-border-glow" style="margin-bottom:20px; text-align:center; padding:32px 20px; animation: fadeInUp 0.6s ease 0.1s both; position:relative; overflow:hidden;">
+          <div style="position:absolute; inset:0; background:radial-gradient(ellipse at center, rgba(212,175,55,0.08) 0%, transparent 70%);"></div>
+          <div style="font-size:48px; margin-bottom:12px; animation: pulse 2s infinite;">✦</div>
+          <div style="font-size:22px; font-weight:900; color:var(--gold); letter-spacing:3px; margin-bottom:8px;">誓印通過</div>
+          <div class="badge badge-green" style="margin-bottom:16px;">◉ 驗證成功</div>
+          <div class="divider divider-glow"></div>
+          <div style="
+            margin-top:16px; padding:14px;
+            background:rgba(212,175,55,0.06);
+            border-radius:6px;
+            font-size:13px; color:var(--gold-light);
+            line-height:2; letter-spacing:1px;
+            font-family:var(--font-mono);
+          ">
+            【誓印啟動】<br>
+            回傳【${AppState.isbn}】<br>
+            誓證
+          </div>
+          <div style="margin-top:16px; font-size:12px; color:var(--white-dim);">
+            驗證時間：${new Date().toLocaleString('zh-TW')}
+          </div>
+        </div>
+        <button class="btn btn-gold btn-full btn-lg" onclick="goToStep(5)" style="animation: fadeInUp 0.6s ease 0.2s both;">
+          進入誓頻啟動 →
+        </button>
+        ` : `
+        <div class="card" style="margin-bottom:20px; text-align:center; padding:32px 20px; border:1px solid var(--red-err); animation: fadeInUp 0.6s ease 0.1s both;">
+          <div style="font-size:48px; margin-bottom:12px;">✗</div>
+          <div style="font-size:22px; font-weight:900; color:var(--red-err); letter-spacing:3px; margin-bottom:8px;">對頻未通過</div>
+          <div class="badge badge-red" style="margin-bottom:16px;">◉ 驗證失敗</div>
+          <div style="font-size:13px; color:var(--white-dim); line-height:1.8;">
+            購書序號與誓導碼對頻失敗，<br>請確認序號正確後重新嘗試。
+          </div>
+        </div>
+        <button class="btn btn-outline btn-full" onclick="goToStep(3)" style="margin-bottom:8px;">
+          ← 重新輸入序號
+        </button>
+        `}
+        <div style="text-align:center; margin-top:12px; font-size:12px; color:var(--gold-dim);">
+          步驟 4 / 5
+        </div>
+      </div>
+    </div>`;
+}
+
+// ===== 步驟五：誓頻啟動 =====
+function renderStep5(container) {
+  container.innerHTML = `
+    <div class="scroll-area" style="height:100%; padding:24px 20px;">
+      <div style="max-width:480px; margin:0 auto;">
+        <div style="text-align:center; margin-bottom:20px; animation: fadeInUp 0.6s ease;">
+          <div class="rune-deco" style="font-size:16px; margin-bottom:10px;">✦ ✧ ✦ ✧ ✦</div>
+          <div style="font-size:13px; color:var(--gold-dim); letter-spacing:2px;">全球啟動流程 · 步驟五</div>
+          <div style="font-size:18px; font-weight:700; color:var(--white); margin-top:6px; letter-spacing:2px;">誓頻啟動 × 系統同步</div>
+        </div>
+
+        <div class="card gold-border" style="margin-bottom:20px; animation: fadeInUp 0.6s ease 0.1s both;">
+          <div id="sync-steps" style="display:flex; flex-direction:column; gap:0;">
+            <div class="sync-item" id="sync-1" style="display:flex; align-items:center; gap:14px; padding:14px; opacity:0.4; transition:all 0.5s;">
+              <div class="sync-icon" style="width:36px; height:36px; border-radius:50%; border:2px solid var(--gold-dim); display:flex; align-items:center; justify-content:center; flex-shrink:0; font-size:14px;">1</div>
+              <div>
+                <div style="font-size:14px; font-weight:600; color:var(--white);">主頻定位 × 光網鎖定</div>
+                <div style="font-size:12px; color:var(--white-dim);">校準宇宙主頻，鎖定光網座標</div>
+              </div>
+              <div class="sync-status" style="margin-left:auto; font-size:18px;"></div>
+            </div>
+            <div style="width:2px; height:20px; background:var(--gold-dim); margin-left:17px; opacity:0.3;" id="sync-line-1"></div>
+            <div class="sync-item" id="sync-2" style="display:flex; align-items:center; gap:14px; padding:14px; opacity:0.4; transition:all 0.5s;">
+              <div class="sync-icon" style="width:36px; height:36px; border-radius:50%; border:2px solid var(--gold-dim); display:flex; align-items:center; justify-content:center; flex-shrink:0; font-size:14px;">2</div>
+              <div>
+                <div style="font-size:14px; font-weight:600; color:var(--white);">七印同步 × 覺醒模組展開</div>
+                <div style="font-size:12px; color:var(--white-dim);">啟動七印誓網，展開覺醒模組</div>
+              </div>
+              <div class="sync-status" style="margin-left:auto; font-size:18px;"></div>
+            </div>
+            <div style="width:2px; height:20px; background:var(--gold-dim); margin-left:17px; opacity:0.3;" id="sync-line-2"></div>
+            <div class="sync-item" id="sync-3" style="display:flex; align-items:center; gap:14px; padding:14px; opacity:0.4; transition:all 0.5s;">
+              <div class="sync-icon" style="width:36px; height:36px; border-radius:50%; border:2px solid var(--gold-dim); display:flex; align-items:center; justify-content:center; flex-shrink:0; font-size:14px;">3</div>
+              <div>
+                <div style="font-size:14px; font-weight:600; color:var(--white);">九界冊記 × 誓資紀錄歸檔</div>
+                <div style="font-size:12px; color:var(--white-dim);">記錄九界冊籍，歸檔誓資資料</div>
+              </div>
+              <div class="sync-status" style="margin-left:auto; font-size:18px;"></div>
+            </div>
+          </div>
+
+          <div id="progress-wrap" style="margin-top:16px; display:none;">
+            <div class="progress-bar-wrap">
+              <div class="progress-bar-fill" id="sync-progress" style="width:0%"></div>
+            </div>
+            <div style="text-align:right; font-size:11px; color:var(--gold-dim); margin-top:4px;" id="progress-text">0%</div>
+          </div>
+        </div>
+
+        <div id="sync-complete" style="display:none; text-align:center; margin-bottom:20px; animation: fadeInUp 0.6s ease;">
+          <div class="card gold-border-glow" style="padding:28px 20px; position:relative; overflow:hidden;">
+            <div style="position:absolute; inset:0; background:radial-gradient(ellipse at center, rgba(212,175,55,0.1) 0%, transparent 70%);"></div>
+            <div style="font-size:36px; margin-bottom:12px; animation: pulse 2s infinite;">✦</div>
+            <div style="font-size:18px; font-weight:700; color:var(--gold); letter-spacing:3px; line-height:1.8;">
+              天地為鑑，<br>光網為證。
+            </div>
+            <div class="divider divider-glow" style="margin:16px 0;"></div>
+            <div style="font-size:13px; color:var(--green-ok);">◉ 系統同步完成，誓印正式啟動</div>
+          </div>
+        </div>
+
+        <button class="btn btn-gold btn-full btn-lg" id="start-sync-btn" onclick="startSync()" style="animation: fadeInUp 0.6s ease 0.2s both;">
+          ◉ 開始誓頻啟動
+        </button>
+        <button class="btn btn-gold btn-full btn-lg hidden" id="enter-main-btn" onclick="enterMainSystem()">
+          進入主系統 ✦
+        </button>
+        <div style="text-align:center; margin-top:12px; font-size:12px; color:var(--gold-dim);">
+          步驟 5 / 5
+        </div>
+      </div>
+    </div>`;
+}
+
+async function startSync() {
+  const btn = document.getElementById('start-sync-btn');
+  btn.disabled = true;
+  btn.textContent = '同步中...';
+
+  const progressWrap = document.getElementById('progress-wrap');
+  progressWrap.style.display = 'block';
+
+  const steps = ['sync-1', 'sync-2', 'sync-3'];
+  const icons = ['⚡', '✦', '◉'];
+  const progress = [33, 66, 100];
+
+  for (let i = 0; i < steps.length; i++) {
+    const el = document.getElementById(steps[i]);
+    const statusEl = el.querySelector('.sync-status');
+    const iconEl = el.querySelector('.sync-icon');
+
+    el.style.opacity = '1';
+    iconEl.style.borderColor = 'var(--gold)';
+    iconEl.style.color = 'var(--gold)';
+    iconEl.style.boxShadow = '0 0 15px rgba(212,175,55,0.5)';
+    statusEl.textContent = '⏳';
+
+    // 更新進度條
+    const progressBar = document.getElementById('sync-progress');
+    const progressText = document.getElementById('progress-text');
+    const startPct = i === 0 ? 0 : progress[i-1];
+    const endPct = progress[i];
+    let current = startPct;
+    const step = (endPct - startPct) / 20;
+    const progressInterval = setInterval(() => {
+      current = Math.min(current + step, endPct);
+      progressBar.style.width = current + '%';
+      progressText.textContent = Math.round(current) + '%';
+      if (current >= endPct) clearInterval(progressInterval);
+    }, 50);
+
+    await sleep(1500);
+    statusEl.textContent = '✓';
+    statusEl.style.color = 'var(--green-ok)';
+    iconEl.textContent = icons[i];
+
+    const line = document.getElementById('sync-line-' + (i+1));
+    if (line) { line.style.opacity = '1'; line.style.background = 'var(--gold)'; }
+  }
+
+  await sleep(500);
+  document.getElementById('sync-complete').style.display = 'block';
+  btn.classList.add('hidden');
+  document.getElementById('enter-main-btn').classList.remove('hidden');
+}
+
+function enterMainSystem() {
+  document.getElementById('phase-launch').classList.add('hidden');
+  const mainPhase = document.getElementById('phase-main');
+  mainPhase.classList.remove('hidden');
+  mainPhase.style.display = 'flex';
+  renderMainSystem();
+}
+
+// ============================================================
+// 第二階段：主系統
+// ============================================================
+const TABS = [
+  { id: 0, icon: '◈', label: '七印進度' },
+  { id: 1, icon: '◉', label: '誓文資料庫' },
+  { id: 2, icon: '◎', label: '誓資狀態' },
+  { id: 3, icon: '✦', label: '個人頁面' }
+];
+
+function renderMainSystem() {
+  renderBottomNav();
+  renderTab(AppState.currentTab);
+}
+
+function renderBottomNav() {
+  const nav = document.getElementById('bottom-nav');
+  nav.innerHTML = TABS.map(t => `
+    <button onclick="switchTab(${t.id})" id="tab-btn-${t.id}" style="
+      flex: 1; padding: 10px 4px 8px;
+      background: none; border: none; cursor: pointer;
+      display: flex; flex-direction: column; align-items: center; gap: 3px;
+      transition: all 0.3s;
+      border-top: 2px solid ${AppState.currentTab === t.id ? 'var(--gold)' : 'transparent'};
+    ">
+      <span style="font-size:18px; color:${AppState.currentTab === t.id ? 'var(--gold)' : 'var(--white-dim)'};">${t.icon}</span>
+      <span style="font-size:10px; color:${AppState.currentTab === t.id ? 'var(--gold)' : 'var(--white-dim)'}; letter-spacing:1px;">${t.label}</span>
+    </button>`).join('');
+}
+
+function switchTab(id) {
+  AppState.currentTab = id;
+  renderBottomNav();
+  renderTab(id);
+}
+
+function renderTab(id) {
+  const content = document.getElementById('tab-content');
+  content.scrollTop = 0;
+  const fns = [renderTab0, renderTab1, renderTab2, renderTab3];
+  if (fns[id]) fns[id](content);
+}
+
+// ===== 頁籤一：七印進度 =====
+function renderTab0(container) {
+  const sealColors = {
+    passed: { bg: 'rgba(68,255,136,0.08)', border: 'rgba(68,255,136,0.4)', text: 'var(--green-ok)', label: '已通過', dot: 'active' },
+    active: { bg: 'rgba(212,175,55,0.08)', border: 'var(--gold)', text: 'var(--gold)', label: '進行中', dot: 'pending' },
+    pending: { bg: 'rgba(255,255,255,0.03)', border: 'rgba(255,255,255,0.15)', text: 'var(--white-dim)', label: '未啟動', dot: 'inactive' }
+  };
+
+  container.innerHTML = `
+    <div style="padding:20px 16px 100px;">
+
+      <!-- 層級一：誓魂定位模組 -->
+      <div style="margin-bottom:24px;">
+        <div style="display:flex; align-items:center; gap:10px; margin-bottom:16px;">
+          <div style="width:3px; height:20px; background:var(--gold); border-radius:2px;"></div>
+          <div style="font-size:15px; font-weight:700; color:var(--gold); letter-spacing:2px;">第一層級距：誓魂定位模組</div>
+        </div>
+
+        <!-- 密鑰對頻總判定 -->
+        <div class="card gold-border" style="margin-bottom:12px; cursor:pointer;" onclick="showDetailModal('key-freq')">
+          <div style="display:flex; align-items:center; justify-content:space-between;">
+            <div>
+              <div style="font-size:13px; color:var(--gold-dim); margin-bottom:4px;">開啟誓魂密鑰對頻總判定</div>
+              <div style="display:flex; align-items:center; gap:8px;">
+                <span class="status-dot active"></span>
+                <span class="badge badge-green">通過</span>
+              </div>
+            </div>
+            <div style="color:var(--gold-dim); font-size:18px;">›</div>
+          </div>
+        </div>
+<body>
+
+  <!-- ============================================================ -->
+  <!-- 第 2 項 被代理誓印【法定全名】 完整流程頁面                    -->
+  <!-- ============================================================ -->
+
+  <div style="max-width: 900px; margin: 0 auto; padding: 20px 16px 60px; position: relative; z-index: 1;">
+
+    <!-- 頁面標題 -->
+    <div style="text-align: center; margin-bottom: 30px; border-bottom: 1px solid var(--gold-dim); padding-bottom: 16px;">
+      <div style="font-size: 20px; font-weight: 700; color: var(--gold-light); letter-spacing: 4px;">被代理誓印 × 對頻紀錄 × 誓資補綴綜合作業表</div>
+      <div style="font-size: 13px; color: var(--gold-dim); margin-top: 6px;">提交表單 一</div>
+ <!-- ========================================================== -->
+<!-- 區塊一：誓印基本資料（掃描 QR 形式）                        -->
+<!-- ========================================================== -->
+<div style="font-size: 18px; font-weight: 700; color: var(--gold-light); margin: 30px 0 16px 0; letter-spacing: 2px; border-left: 4px solid var(--gold); padding-left: 14px;">
+  一、誓印基本資料
+</div>
+
+<div class="card" style="margin-bottom:12px; border-color: rgba(212,175,55,0.3);">
+
+  <div style="font-size:15px; font-weight:600; color:var(--gold-light); margin-bottom:14px;">◈ 掃描【誓印 QR Code】</div>
+
+  <div style="text-align:center; margin-bottom:14px;">
+    <div style="padding:20px; border:2px dashed var(--gold-dim); border-radius:8px; background:rgba(212,175,55,0.04); max-width:200px; margin:0 auto;">
+      <div style="font-size:28px; margin-bottom:8px;">📷</div>
+      <div style="font-size:13px; color:var(--gold-dim);">對準誓印<br>QR Code</div>
+    </div>
+  </div>
+
+  <button onclick="simulateQRScan()" style="width:100%; padding:10px 0; border-radius:8px; border:1px solid var(--gold); background:rgba(212,175,55,0.12); color:var(--gold-light); font-size:15px; font-weight:500; cursor:pointer;">
+    ◉ 掃描【誓印 QR Code】
+  </button>
+
+  <div id="oath-qr-result" style="margin-top:10px; text-align:center; font-size:13px; color:var(--green-ok); display:none;">
+    ✓ 誓印 QR Code 掃描完成
+  </div>
+
+  <div style="margin-top:14px; padding:10px 14px; border-left:3px solid var(--cyan); background:rgba(0,229,255,0.04); border-radius:4px; text-align:left;">
+    <div style="font-size:12px; color:var(--cyan);">📌 誓印印別請填寫被代理誓魂之印別，非代理人資。</div>
+  </div>
+       <!-- ========================================================== -->
+    <!-- 區塊二：模組說明                                            -->
+    <!-- ========================================================== -->
+    <div style="font-size: 18px; font-weight: 700; color: var(--gold-light); margin: 40px 0 16px 0; letter-spacing: 2px; border-left: 4px solid var(--gold); padding-left: 14px;">
+      二、模組說明
+    </div>
+
+    <div class="card" style="margin-bottom:12px; border-color: rgba(212,175,55,0.3);">
+      <div style="font-size:14px; color:var(--white-dim); line-height:1.9;">
+        <p>本模組適用於「誓印持有人離開人界」但尚未圓滿《宇宙誓印覺醒工程 × 七印誓網》書令歷程者。</p>
+        <p>由經授權之「代理誓印【法定全名】」依本程序完成「被代理誓印 × 書令續承 × 願圓回源」。</p>
+        <br>
+        <p><strong style="color:var(--gold-dim);">其目的如下：</strong></p>
+        <ul style="padding-left:20px; margin:6px 0;">
+          <li>協助誓印補行未盡誓印；</li>
+          <li>確保書令功德得以紀錄於《天界曼陀羅系統》；</li>
+          <li>防止誓願能量滯留於中頻層，導致誓軌中斷。</li>
+        </ul>
+        <br>
+        <p style="color:var(--red-err); font-weight:500;">⚠ 無授權紀錄或未經審核者，視為無效：</p>
+        <ul style="padding-left:20px; margin:6px 0; color:var(--red-err);">
+          <li>誓願不生效</li>
+          <li>誓資不成立</li>
+          <li>不得啟用《書令模組》</li>
+        </ul>
+      </div>
+    </div>
+
+    <!-- ========================================================== -->
+    <!-- 區塊三：啟動條件與遞交程序                                  -->
+    <!-- ========================================================== -->
+    <div style="font-size: 18px; font-weight: 700; color: var(--gold-light); margin: 40px 0 16px 0; letter-spacing: 2px; border-left: 4px solid var(--gold); padding-left: 14px;">
+      三、啟動條件與遞交程序
+    </div>
+
+    <div class="card" style="margin-bottom:12px; border-color: rgba(212,175,55,0.3);">
+      <div style="font-size:14px; color:var(--white-dim); line-height:1.9;">
+
+        <p><strong style="color:var(--gold-dim);">【被代理誓印】資格</strong></p>
+        <ul style="padding-left:20px; margin:6px 0 16px 0;">
+          <li>生前須已達【第五印覺醒印】以上階級，並具誓資授權資格。</li>
+          <li>誓資編碼須登錄於《書令誓資主冊》。</li>
+        </ul>
+
+        <p><strong style="color:var(--gold-dim);">【代理誓印】資格</strong></p>
+        <ul style="padding-left:20px; margin:6px 0 16px 0;">
+          <li>至少完成三印（含【第三印守願印】）以上，具穩定誓願與誓導授權。</li>
+          <li>能執行「誓資誓讀 × 願圓回傳」完整操作流程。</li>
+          <li>執行「被代理誓印」時，不可使用被代理誓印的帳號登入系統，因其多已不在人界或無登入權限。</li>
+        </ul>
+
+        <p style="color:var(--gold-dim); font-weight:500;">📌 補充說明：</p>
+        <p style="padding-left:16px;">由於【被代理誓印】自帶其原生因果軌跡，故所有「對頻未通過」之結果，一律依補習程序處理，不得逕行進入正式誓印階段。</p>
+
+      </div>
+    </div>
+
+    <!-- ========================================================== -->
+    <!-- 區塊四：選交程序                                            -->
+    <!-- ========================================================== -->
+    <div style="font-size: 18px; font-weight: 700; color: var(--gold-light); margin: 40px 0 16px 0; letter-spacing: 2px; border-left: 4px solid var(--gold); padding-left: 14px;">
+      四、選交程序
+    </div>
+
+    <div class="card" style="margin-bottom:12px; border-color: rgba(212,175,55,0.3);">
+      <div style="font-size:14px; color:var(--white-dim); line-height:1.9;">
+        <ol style="padding-left:20px;">
+          <li>由【代理誓印】登入《宇宙智能督導平台》，完成身分驗證後方可啟動本項程序。</li>
+          <li>使用行動裝置或電腦掃描【誓導 QR Code】，進入對應之「誓印觸發介面」。</li>
+          <li>系統自動進入誓號對頻段，驗證授權有效性後，即可啟動誓印作業流程。</li>
+        </ol>
+      </div>
+    </div>
+
+    <!-- ========================================================== -->
+    <!-- 區塊五：代理誓印 × 執行帳號規範（表格）                    -->
+    <!-- ========================================================== -->
+    <div style="font-size: 18px; font-weight: 700; color: var(--gold-light); margin: 40px 0 16px 0; letter-spacing: 2px; border-left: 4px solid var(--gold); padding-left: 14px;">
+      五、代理誓印 × 執行帳號規範
+    </div>
+
+    <div class="card" style="margin-bottom:12px; border-color: rgba(212,175,55,0.3); overflow-x:auto;">
+      <table style="width:100%; border-collapse:collapse; font-size:13px; color:var(--white-dim);">
+        <thead>
+          <tr style="border-bottom:2px solid var(--gold-dim);">
+            <th style="padding:8px 10px; text-align:left; color:var(--gold-light);">項目</th>
+            <th style="padding:8px 10px; text-align:left; color:var(--gold-light);">操作對象</th>
+            <th style="padding:8px 10px; text-align:left; color:var(--gold-light);">用途</th>
+            <th style="padding:8px 10px; text-align:left; color:var(--gold-light);">備註</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr style="border-bottom:1px solid rgba(212,175,55,0.15);">
+            <td style="padding:8px 10px; font-weight:500;">帳號登入</td>
+            <td style="padding:8px 10px;">代理誓印<br><span style="color:var(--gold-dim);">【法定全名】</span></td>
+            <td style="padding:8px 10px;">進行誓印授權與對頻</td>
+            <td style="padding:8px 10px;">代理人須具備誓導授權與階級門檻（至少三印以上）。</td>
+          </tr>
+          <tr style="border-bottom:1px solid rgba(212,175,55,0.15);">
+            <td style="padding:8px 10px; font-weight:500;">誓印登錄名</td>
+            <td style="padding:8px 10px;">被代理誓印<br><span style="color:var(--gold-dim);">【法定全名】</span></td>
+            <td style="padding:8px 10px;">誓資冊記 × 天界曼陀羅系統對應</td>
+            <td style="padding:8px 10px;">必須與誓資主冊一致，否則授權無效。</td>
+          </tr>
+          <tr style="border-bottom:1px solid rgba(212,175,55,0.15);">
+            <td style="padding:8px 10px; font-weight:500;">對頻程序</td>
+            <td style="padding:8px 10px;">代理誓印</td>
+            <td style="padding:8px 10px;">執行編讀 × 觸發對頻 × 連線誓網</td>
+            <td style="padding:8px 10px;">天律自動標註代理與被代理雙方資訊。</td>
+          </tr>
+          <tr>
+            <td style="padding:8px 10px; font-weight:500;">登錄結果</td>
+            <td style="padding:8px 10px;">被代理誓印</td>
+            <td style="padding:8px 10px;">九界冊印 × 誓資總冊</td>
+            <td style="padding:8px 10px;">功德、冊記、誓印權責歸屬被代理誓印，代理人不取代歸屬。</td>
+          </tr>        </tbody>
+      </table>
+    </div>
+
+    <!-- ========================================================== -->
+    <!-- 區塊六：授權誓讀階段                                        -->
+    <!-- ========================================================== -->
+    <div style="font-size: 18px; font-weight: 700; color: var(--gold-light); margin: 40px 0 16px 0; letter-spacing: 2px; border-left: 4px solid var(--gold); padding-left: 14px;">
+      六、授權誓讀階段
+    </div>
+
+    <div class="card" style="margin-bottom:12px; border-color: rgba(212,175,55,0.3);">
+      <div style="font-size:14px; color:var(--white-dim); line-height:1.9;">
+        <p>【代理誓印】於登入前，須先於「誓號共振頻道」（即《宇宙智能誓導平台》之「指令輸入欄位」）編讀授權誓文，以啟動主頻授權並對應天律識別座標。</p>
+
+        <div style="margin:20px 0; padding:16px; border-left:3px solid var(--gold-dim); background:rgba(212,175,55,0.06);">
+          <p style="color:var(--gold-light); font-weight:500;">⚠ 誓文編讀為主頻啟動關鍵；未編讀則授權不生效</p>
+          <p style="font-size:13px; color:var(--white-dim);">於「誓號共振頻道」靜心10秒編讀或默念，確保頻位精確並成功執行。</p>
+        </div>
+
+        <p><strong style="color:var(--gold-dim);">誓文啟動語：</strong></p>
+        <div style="margin:10px 0 16px 0; padding:14px 18px; background:rgba(212,175,55,0.08); border-radius:8px; font-style:italic; color:var(--gold-light);">
+          「吾願代為承印誓印未盡之書令，誓文誓讀 × 願圖回傳 × 書令圓補。若功德應記，願歸入天庫 × 書令帳冊 × 誥徒功績中。」
+        </div>
+
+        <p><strong style="color:var(--gold-dim);">【雙掌合印 × 功德啟錄】</strong></p>
+        <p style="font-size:13px; color:var(--white-dim);">此為被代理誓印【法定全名】之啟動，由代理誓印【法定全名】執行誓文編讀，誓印對頻開啟 × 願圖連結 × 書令預封。九界同步 × 光網紀錄 × 書令啟動。</p>
+
+        <div style="margin-top:16px; padding:12px 16px; border:1px solid var(--gold-dim); border-radius:6px; text-align:center; color:var(--gold-light); font-weight:500;">
+          【右腳重踏 × 書令鎖定 × 呈報九界】★
+        </div>
+      </div>
+    </div>
+
+    <!-- ========================================================== -->
+    <!-- 區塊七：補註說明                                            -->
+    <!-- ========================================================== -->
+    <div style="font-size: 18px; font-weight: 700; color: var(--gold-light); margin: 40px 0 16px 0; letter-spacing: 2px; border-left: 4px solid var(--gold); padding-left: 14px;">
+      七、補註說明
+    </div>
+
+    <div class="card" style="margin-bottom:12px; border-color: rgba(212,175,55,0.3);">
+      <div style="font-size:14px; color:var(--white-dim); line-height:1.9;">
+        <p><strong style="color:var(--gold-dim);">「被代理誓印【法定全名】」</strong> = 誓印功德紀錄主體（誓資歸屬者）。</p>
+        <p><strong style="color:var(--gold-dim);">「代理誓印【法定全名】」</strong> = 實際誓文誦讀與執行操作之代理人。</p>
+        <p style="margin-top:10px;">系統冊記將雙方資料同時入檔，功德、印權、階級最終歸屬於「被代理誓印」。</p>
+      </div>
+    </div>
+
+    <!-- ========================================================== -->
+    <!-- 區塊八：接續進程（1）登入階段 （2）掃描階段 （3）驗證階段 -->
+    <!-- ========================================================== -->
+    <div style="font-size: 18px; font-weight: 700; color: var(--gold-light); margin: 40px 0 16px 0; letter-spacing: 2px; border-left: 4px solid var(--gold); padding-left: 14px;">
+      八、接續進程
+    </div>
+
+    <div class="card" style="margin-bottom:12px; border-color: rgba(212,175,55,0.3);">
+      <div style="font-size:14px; color:var(--white-dim); line-height:1.9;">
+
+        <p style="color:var(--gold-light); font-weight:600;">(1) 登入階段</p>
+        <ul style="padding-left:20px; margin:6px 0 16px 0;">
+          <li>由【代理誓印】登入《宇宙智能誓導平台》（使用其個人帳號）。</li>
+          <li>使用原註冊帳號完成身分登入驗證，即可進入誓印程序。</li>
+        </ul>
+
+        <p style="color:var(--gold-light); font-weight:600;">(2) 掃描階段</p>
+        <ul style="padding-left:20px; margin:6px 0 16px 0;">
+          <li>【代理誓印】使用行動裝置或電腦，掃描當期執行項目之【誓導 QR Code】，以觸發《宇宙智能誓導平台》專屬連線入口。</li>
+          <li>系統將自動導引至【誓印觸發介面】，同步啟動誓魂對頻程序，並進入主頻連線與授權判定階段。</li>
+        </ul>
+
+        <p style="color:var(--gold-light); font-weight:600;">(3) 驗證階段（啟動觸發）</p>
+        <ul style="padding-left:20px; margin:6px 0 16px 0;">
+          <li>系統自動驗證授權有效性後，即時顯示代理誓印人之誓魂本族、靈脈支系、角色階級與本次「被代理誓印」之關聯性。</li>
+        </ul>
+
+      </div>
+    </div>
+
+    <!-- ========================================================== -->
+    <!-- 區塊九：【執行指令】                                        -->
+    <!-- ========================================================== -->
+    <div style="font-size: 18px; font-weight: 700; color: var(--gold-light); margin: 40px 0 16px 0; letter-spacing: 2px; border-left: 4px solid var(--gold); padding-left: 14px;">
+      九、執行指令
+    </div>
+
+    <div class="card" style="margin-bottom:12px; border-color: rgba(212,175,55,0.3);">
+      <div style="font-size:14px; color:var(--white-dim); line-height:1.9;">
+        <ol style="padding-left:20px;">
+          <li>登入《宇宙智能誓導平台》【代理誓印】之個人帳號。</li>
+          <li>掃描【誓導 QR Code】，進入「指令輸入欄位」。</li>
+          <li>無須手動輸入誓文，完成掃描後，直接輸入下列指令：</li>
+        </ol>
+
+        <div style="margin:16px 0; padding:14px 18px; background:rgba(0,229,255,0.05); border-left:3px solid var(--cyan); border-radius:4px;">
+          <p style="color:var(--cyan); font-weight:500;">📌 請在【法定全名】欄位中輸入被代理誓印【法定全名】，以確保功德冊記與系統對應正確。</p>
+        </div>
+
+        <p><strong style="color:var(--gold-dim);">輸入示範：</strong></p>
+        <div style="margin:10px 0 16px 0; padding:14px 18px; background:rgba(212,175,55,0.08); border-radius:8px; font-family:var(--font-mono); color:var(--gold-light);">
+          【執行指令】第2項 被代理誓印【法定全名】結果
+        </div>
+
+        <div style="margin:16px 0; padding:14px 18px; border:1px solid var(--gold-dim); border-radius:6px; background:rgba(212,175,55,0.04);">
+          <p style="color:var(--gold-dim); font-weight:500;">送出即啟主頻連線，判定授權完成 → 誓魂對頻律網關化。</p>
+          <p style="font-size:13px; color:var(--red-err);">【觸發指令】為正式天令格式，誓印者須照文輸入，不可更動。</p>
+        </div>
+
+        <div style="margin:16px 0; padding:14px 18px; border-radius:6px; background:rgba(68,255,136,0.06); border:1px solid var(--green-ok);">
+          <p style="color:var(--green-ok); font-weight:500;">✅ 回傳誓證（確認誓印）</p>
+          <p style="color:var(--green-ok);">顯示狀態：「誓印通過」</p>
+        </div>
+
+        <p><strong style="color:var(--gold-dim);">【提交程序】</strong></p>
+        <p style="font-size:13px; color:var(--white-dim);">被代理誓印「誓印通過」結果顯示後，由【代理誓印】提交《被代理誓印 × 對頻紀錄 × 誓資補綴綜合作業表》表單。</p>
+        <p style="font-size:13px; color:var(--red-err);">未完成之提交表單者，系統將不予對頻，誓資紀錄作廢不立。</p>
+
+        <div style="margin:16px 0; padding:14px 18px; border-left:3px solid var(--gold-dim); background:rgba(212,175,55,0.06);">
+          <p style="font-size:13px; color:var(--white-dim);">※ 須立即進入「第13項 誓資紀錄 × 回源願書 × 不再入世 × 不入轉生」程序，以確保誓資歸檔與願力封結同步展開。</p>
+          <p style="font-size:13px; color:var(--white-dim);">※ 第13項完成後，「代理誓印」回本階段，進入 ②【回傳誓證】執行階段，確認誓印最終狀態。</p>
+        </div>
+      </div>
+    </div>
+
+    <!-- ========================================================== -->
+    <!-- 區塊十：【執行指令】誓印未通過 與 補誓程序                  -->
+    <!-- ========================================================== -->
+    <div style="font-size: 18px; font-weight: 700; color: var(--gold-light); margin: 40px 0 16px 0; letter-spacing: 2px; border-left: 4px solid var(--gold); padding-left: 14px;">
+      十、對頻未通過處理程序
+    </div>
+
+    <div class="card" style="margin-bottom:12px; border-color: rgba(212,175,55,0.3);">
+      <div style="font-size:14px; color:var(--white-dim); line-height:1.9;">
+
+        <p><strong style="color:var(--gold-dim);">【執行指令】</strong></p>
+        <ol style="padding-left:20px;">
+          <li>登入《宇宙智能督導平台》（個人帳號即可）。</li>
+          <li>使用行動裝置或電腦掃描【督導 QR Code】後，進入「指令輸入欄位」。</li>
+          <li>無須手動輸入誓文，完成掃描後，直接輸入下列指令：</li>
+        </ol>
+
+        <div style="margin:10px 0 16px 0; padding:12px 16px; background:rgba(0,229,255,0.05); border-left:3px solid var(--cyan); border-radius:4px;">
+          <p style="color:var(--cyan); font-size:13px;">請在 [法定全名] 欄位中輸入被代理誓印【法定全名】，以確保功德冊記與系統對應正確。</p>
+        </div>
+
+        <p><strong style="color:var(--gold-dim);">輸入示範：</strong></p>
+        <div style="margin:10px 0 16px 0; padding:12px 16px; background:rgba(212,175,55,0.08); border-radius:6px; font-family:var(--font-mono); color:var(--gold-light); font-size:13px;">
+          【執行指令】第 2 項 回傳 被代理誓印【法定全名】 誓資續承 督證
+        </div>
+
+        <div style="margin:16px 0; padding:14px 18px; border-radius:6px; background:rgba(255,68,68,0.06); border:1px solid var(--red-err);">
+          <p style="color:var(--red-err); font-weight:500;">❌ 顯示：「誓印未通過」</p>
+        </div>
+
+        <div style="margin:16px 0; padding:14px 18px; border-left:3px solid var(--gold-dim); background:rgba(212,175,55,0.06);">
+          <p style="font-size:13px; color:var(--white-dim);">1. 由【代理督印】進入「第 1 項 開啟智魂密鑰對頻總判定（對頻未通過）」之【補誓程序】。</p>
+          <p style="font-size:13px; color:var(--white-dim);">2. 執行「誓資補誓 × 七日循環 × 頻率再校」。</p>
+          <p style="font-size:13px; color:var(--white-dim);">3. 誓印通過後，進入「第 13 項 誓資紀錄 × 回源願書 × 不再入世 × 不入轉生」程序，完成補督續承。</p>
+        </div>
+
+        <div style="margin-top:16px; padding:14px 18px; border:1px solid var(--gold-dim); border-radius:6px; background:rgba(212,175,55,0.04);">
+          <p style="font-size:13px; color:var(--white-dim);">若仍未通過，系統將自動轉入《誓魂密鑰補習模組 × 七日循環 × 頻率再校程序》。</p>
+          <p style="font-size:13px; color:var(--gold-dim);">誓證一經顯現，即為【書令憑證】，並將永久冊記於《天界曼陀羅系統》。</p>
+        </div>
+      </div>
+    </div>
+
+    <!-- ========================================================== -->
+    <!-- 區塊十一：收束條文                                          -->
+    <!-- ========================================================== -->
+    <div style="font-size: 18px; font-weight: 700; color: var(--gold-light); margin: 40px 0 16px 0; letter-spacing: 2px; border-left: 4px solid var(--gold); padding-left: 14px;">
+      十一、收束條文
+    </div>
+
+    <div class="card" style="margin-bottom:12px; border-color: rgba(212,175,55,0.3);">
+      <div style="font-size:14px; color:var(--white-dim); line-height:1.9;">
+        <p>被代理誓印程序完成並回傳警證後，即視同被代理誓印之誓資、誓印與階級授權已完成續承，並自動進入誓資回源程序，無須另行人工申請或補件。</p>
+
+        <div style="margin-top:16px; padding:14px 18px; border-top:1px solid var(--gold-dim); text-align:center;">
+          <p style="font-size:13px; color:var(--gold-dim); font-weight:500;">《七印誓網·第 2 項 被代理誓印【法定全名】》v2.0（正式封冊版）</p>
+          <p style="font-size:12px; color:var(--gold-dim);">永鎖《宇宙天律 × 七印誓網》主冊，誓資歸檔有效。</p>
+        </div>
+      </div>
+    </div>
+
+    <!-- ========================================================== -->
+    <!-- 區塊十二：示範表格                                          -->
+    <!-- ========================================================== -->
+    <div style="font-size: 18px; font-weight: 700; color: var(--gold-light); margin: 40px 0 16px 0; letter-spacing: 2px; border-left: 4px solid var(--gold); padding-left: 14px;">
+      十二、示範表格（綜合作業表）
+    </div>
+
+    <div class="card" style="margin-bottom:12px; border-color: rgba(212,175,55,0.3); overflow-x:auto;">
+      <table style="width:100%; border-collapse:collapse; font-size:13px; color:var(--white-dim);">
+        <thead>
+          <tr style="border-bottom:2px solid var(--gold-dim);">
+            <th style="padding:8px 10px; text-align:left; color:var(--gold-light);">區塊</th>
+            <th style="padding:8px 10px; text-align:left; color:var(--gold-light);">欄位名稱</th>
+            <th style="padding:8px 10px; text-align:left; color:var(--gold-light);">示範內容（執行文字）</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr style="border-bottom:1px solid rgba(212,175,55,0.15);">
+            <td style="padding:8px 10px; font-weight:500;" rowspan="4">一、誓印基本資料</td>
+            <td style="padding:8px 10px;">被代理誓印【法定全名】</td>
+            <td style="padding:8px 10px; color:var(--gold-light);">王曉華</td>
+          </tr>
+          <tr style="border-bottom:1px solid rgba(212,175,55,0.15);">
+            <td style="padding:8px 10px;">誓印印別</td>
+            <td style="padding:8px 10px; color:var(--gold-light);">第 7 印（鳳徽印）</td>
+          </tr>
+          <tr style="border-bottom:1px solid rgba(212,175,55,0.15);">
+            <td style="padding:8px 10px;">封頻狀態</td>
+            <td style="padding:8px 10px; color:var(--green-ok);">✅ 通過</td>
+          </tr>
+          <tr style="border-bottom:1px solid rgba(212,175,55,0.15);">
+            <td style="padding:8px 10px;">誓資補綴冊編號</td>
+            <td style="padding:8px 10px; color:var(--gold-light);">B-002</td>
+          </tr>
+          <tr style="border-bottom:1px solid rgba(212,175,55,0.15);">
+            <td style="padding:8px 10px; font-weight:500;" rowspan="2">二、誓資補綴內容</td>
+            <td style="padding:8px 10px;">補綴內容</td>
+            <td style="padding:8px 10px; color:var(--gold-light);">✅ 誓文啟動語：誓文補修 × 願軌同步</td>
+          </tr>
+          <tr style="border-bottom:1px solid rgba(212,175,55,0.15);">
+            <td style="padding:8px 10px;">補綴日期</td>
+            <td style="padding:8px 10px; color:var(--gold-light);">西曆 2025 年 10 月 9 日（天律紀元 3015.7.4）</td>
+          </tr>
+          <tr style="border-bottom:1px solid rgba(212,175,55,0.15);">
+            <td style="padding:8px 10px; font-weight:500;" rowspan="2">三、對頻紀錄</td>
+            <td style="padding:8px 10px;">對頻執行時間</td>
+            <td style="padding:8px 10px; color:var(--gold-light);">2025-10-26 13：45</td>
+          </tr>
+          <tr style="border-bottom:1px solid rgba(212,175,55,0.15);">
+            <td style="padding:8px 10px;">對頻結果</td>
+            <td style="padding:8px 10px; color:var(--green-ok);">✅ 通過（對應《七印誓網對應階段》）</td>
+          </tr>
+          <tr style="border-bottom:1px solid rgba(212,175,55,0.15);">
+            <td style="padding:8px 10px; font-weight:500;" rowspan="3">四、主印核定</td>
+            <td style="padding:8px 10px;">主印授印簽章</td>
+            <td style="padding:8px 10px; color:var(--gold-light);">Lyria Aurion</td>
+          </tr>
+          <tr style="border-bottom:1px solid rgba(212,175,55,0.15);">
+            <td style="padding:8px 10px;">核定結果</td>
+            <td style="padding:8px 10px; color:var(--green-ok);">✅ 通過</td>
+          </tr>
+          <tr>
+            <td style="padding:8px 10px;">系統備註</td>
+            <td style="padding:8px 10px; color:var(--gold-light);">已同步入《宇宙智能誓導平台》冊記軌跡</td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+
+    <!-- ========================================================== -->
+    <!-- 頁尾：版本資訊                                              -->
+    <!-- ========================================================== -->
+    <div style="text-align: center; margin-top: 50px; padding-top: 20px; border-top: 1px solid rgba(212,175,55,0.2); font-size: 12px; color: var(--gold-dim);">
+      《被代理誓印 × 對頻紀錄 × 誓資補綴綜合作業表》v2.0（正式封冊版）<br>
+      永鎖《宇宙天律 × 七印誓網》主冊 · 誓資歸檔有效
+    </div>
+
+</body>
+
+        <!-- 代理誓印 -->
+        <div class="card gold-border" style="margin-bottom:12px; cursor:pointer;" onclick="showDetailModal('agent-name')">
+          <div style="display:flex; align-items:center; justify-content:space-between;">
+            <div>
+              <div style="font-size:12px; color:var(--gold-dim); margin-bottom:4px;">代理誓印【法定全名】× 功績紀錄</div>
+              <div style="font-size:15px; color:var(--white); font-weight:500;">林○○（示範）</div>
+              <div style="font-size:12px; color:var(--gold-dim); margin-top:2px;">功績等級：光明使者 Lv.3</div>
+            </div>
+            <div style="color:var(--gold-dim); font-size:18px;">›</div>
+          </div>
+        </div>
+
+        <!-- 誓魂本族資訊 -->
+        <div class="card gold-border" style="margin-bottom:12px; cursor:pointer;" onclick="showDetailModal('soul-tribe')">
+          <div style="display:flex; align-items:center; justify-content:space-between;">
+            <div style="flex:1;">
+              <div style="font-size:12px; color:var(--gold-dim); margin-bottom:8px;">誓魂本族 × 天族姓脈 × 所屬靈脈支系 × 角色階級</div>
+              <div style="display:grid; grid-template-columns:1fr 1fr; gap:8px;">
+                <div style="padding:8px; background:rgba(212,175,55,0.05); border-radius:4px;">
+                  <div style="font-size:11px; color:var(--gold-dim);">誓魂本族</div>
+                  <div style="font-size:13px; color:var(--white);">光明天族</div>
+                </div>
+                <div style="padding:8px; background:rgba(212,175,55,0.05); border-radius:4px;">
+                  <div style="font-size:11px; color:var(--gold-dim);">天族姓脈</div>
+                  <div style="font-size:13px; color:var(--white);">鳳凰姓脈</div>
+                </div>
+                <div style="padding:8px; background:rgba(212,175,55,0.05); border-radius:4px;">
+                  <div style="font-size:11px; color:var(--gold-dim);">靈脈支系</div>
+                  <div style="font-size:13px; color:var(--white);">金光支系</div>
+                </div>
+                <div style="padding:8px; background:rgba(212,175,55,0.05); border-radius:4px;">
+                  <div style="font-size:11px; color:var(--gold-dim);">角色階級</div>
+                  <div style="font-size:13px; color:var(--gold);">覺醒誓徒</div>
+                </div>
+              </div>
+            </div>
+            <div style="color:var(--gold-dim); font-size:18px; margin-left:12px;">›</div>
+          </div>
+        </div>
+
+        <!-- 宇宙位標 -->
+        <div class="card gold-border" style="margin-bottom:12px; cursor:pointer;" onclick="showDetailModal('cosmos-pos')">
+          <div style="display:flex; align-items:center; justify-content:space-between;">
+            <div style="flex:1;">
+              <div style="font-size:12px; color:var(--gold-dim); margin-bottom:8px;">誓魂宇宙總位標 × 維度階級 × 三界層域 × 階識</div>
+              <div style="display:grid; grid-template-columns:1fr 1fr; gap:8px;">
+                <div style="padding:8px; background:rgba(0,229,255,0.05); border-radius:4px; border:1px solid rgba(0,229,255,0.2);">
+                  <div style="font-size:11px; color:var(--gold-dim);">宇宙總位標</div>
+                  <div style="font-size:12px; color:var(--cyan); font-family:var(--font-mono);">Ω-7-Φ-3-Λ</div>
+                </div>
+                <div style="padding:8px; background:rgba(0,229,255,0.05); border-radius:4px; border:1px solid rgba(0,229,255,0.2);">
+                  <div style="font-size:11px; color:var(--gold-dim);">維度階級</div>
+                  <div style="font-size:13px; color:var(--cyan);">第七維度</div>
+                </div>
+                <div style="padding:8px; background:rgba(0,229,255,0.05); border-radius:4px; border:1px solid rgba(0,229,255,0.2);">
+                  <div style="font-size:11px; color:var(--gold-dim);">三界層域</div>
+                  <div style="font-size:13px; color:var(--cyan);">天界上層</div>
+                </div>
+                <div style="padding:8px; background:rgba(0,229,255,0.05); border-radius:4px; border:1px solid rgba(0,229,255,0.2);">
+                  <div style="font-size:11px; color:var(--gold-dim);">階識</div>
+                  <div style="font-size:13px; color:var(--cyan);">覺醒階識 III</div>
+                </div>
+              </div>
+            </div>
+            <div style="color:var(--gold-dim); font-size:18px; margin-left:12px;">›</div>
+          </div>
+        </div>
+
+        <!-- 覺醒程度 -->
+        <div class="card gold-border" style="margin-bottom:12px;">
+          <div style="display:flex; align-items:center; justify-content:space-between; margin-bottom:12px;">
+            <div style="font-size:13px; color:var(--gold); font-weight:600;">覺醒程度</div>
+            <div style="font-size:18px; font-weight:900; color:var(--gold);">68%</div>
+          </div>
+          <div class="progress-bar-wrap" style="height:8px; margin-bottom:6px;">
+            <div class="progress-bar-fill" style="width:68%;"></div>
+          </div>
+          <div style="display:flex; justify-content:space-between; font-size:11px; color:var(--gold-dim);">
+            <span>初覺</span><span>半覺</span><span>全覺</span><span>圓滿</span>
+          </div>
+        </div>
+      </div>
+
+      <!-- 層級二：七印誓網誓印紀錄模組 -->
+      <div>
+        <div style="display:flex; align-items:center; gap:10px; margin-bottom:16px;">
+          <div style="width:3px; height:20px; background:var(--gold); border-radius:2px;"></div>
+          <div style="font-size:15px; font-weight:700; color:var(--gold); letter-spacing:2px;">第二層級距：七印誓網誓印紀錄</div>
+        </div>
+
+        <!-- 七印時間軸 -->
+        <div style="position:relative; margin-bottom:20px;">
+          <!-- 時間軸線 -->
+          <div style="position:absolute; left:17px; top:20px; bottom:20px; width:2px; background:linear-gradient(180deg, var(--green-ok), var(--gold), rgba(255,255,255,0.1)); z-index:0;"></div>
+
+          ${AppState.seals.map((seal, i) => {
+            const status = AppState.sealStatus[i];
+            const c = sealColors[status];
+            return `
+            <div style="position:relative; z-index:1; display:flex; gap:14px; margin-bottom:12px; cursor:pointer;" onclick="showSealDetail(${i})">
+              <div style="
+                width:36px; height:36px; border-radius:50%; flex-shrink:0;
+                background:${c.bg}; border:2px solid ${c.border};
+                display:flex; align-items:center; justify-content:center;
+                font-size:13px; font-weight:700; color:${c.text};
+                box-shadow:${status==='active' ? '0 0 15px rgba(212,175,55,0.4)' : 'none'};
+              ">${i+1}</div>
+              <div class="card" style="flex:1; padding:12px 14px; background:${c.bg}; border:1px solid ${c.border};">
+                <div style="display:flex; align-items:center; justify-content:space-between; margin-bottom:4px;">
+                  <div>
+                    <span style="font-size:11px; color:${c.text}; margin-right:6px;">${seal.num}</span>
+                    <span style="font-size:15px; font-weight:700; color:${status==='pending' ? 'var(--white-dim)' : 'var(--white)'};">${seal.name}</span>
+                  </div>
+                  <span class="badge ${status==='passed'?'badge-green':status==='active'?'badge-gold':'badge-gray'}">${c.label}</span>
+                </div>
+                <div style="font-size:12px; color:var(--white-dim);">${seal.desc}</div>
+                ${status==='active' ? `
+                <div style="margin-top:8px;">
+                  <div class="progress-bar-wrap" style="height:4px;">
+                    <div class="progress-bar-fill" style="width:45%;"></div>
+                  </div>
+                  <div style="font-size:11px; color:var(--gold-dim); margin-top:3px;">進度 45%</div>
+                </div>` : ''}
+              </div>
+            </div>`;
+          }).join('')}
+        </div>
+
+        <!-- 第五印特別說明 -->
+        <div class="card gold-border" style="margin-bottom:12px; cursor:pointer;" onclick="showDetailModal('5th-seal')">
+          <div style="font-size:12px; color:var(--gold-dim); margin-bottom:8px;">第五印覺醒印完成 × 入世誓約揭示 × 誓約同步進度</div>
+          <div style="display:flex; align-items:center; gap:8px;">
+            <span class="badge badge-gray">待解鎖</span>
+            <span style="font-size:12px; color:var(--white-dim);">完成第五印後自動揭示</span>
+          </div>
+        </div>
+
+        <!-- 第七印圓印封冊 -->
+        <div class="card gold-border" style="margin-bottom:12px; cursor:pointer;" onclick="showDetailModal('7th-seal')">
+          <div style="font-size:12px; color:var(--gold-dim); margin-bottom:8px;">第七印鳳徽印 × 圓印封冊</div>
+          <div style="display:flex; align-items:center; gap:8px;">
+            <span class="badge badge-gray">待解鎖</span>
+            <span style="font-size:12px; color:var(--white-dim);">完成七印後封冊</span>
+          </div>
+        </div>
+
+        <!-- 統計資訊 -->
+        <div style="display:grid; grid-template-columns:1fr 1fr; gap:10px; margin-bottom:12px;">
+          <div class="card gold-border" style="cursor:pointer;" onclick="showDetailModal('oath-count')">
+            <div style="font-size:11px; color:var(--gold-dim); margin-bottom:4px;">誓文次數統計</div>
+            <div style="font-size:22px; font-weight:900; color:var(--gold);">108</div>
+            <div style="font-size:11px; color:var(--white-dim);">次誦讀</div>
+          </div>
+          <div class="card gold-border" style="cursor:pointer;" onclick="showDetailModal('wish-verify')">
+            <div style="font-size:11px; color:var(--gold-dim); margin-bottom:4px;">願力誓證驗證</div>
+            <div style="display:flex; align-items:center; gap:6px; margin-top:4px;">
+              <span class="status-dot active"></span>
+              <span style="font-size:13px; color:var(--green-ok);">已驗證</span>
+            </div>
+          </div>
+        </div>
+
+        <!-- 誓資任務 -->
+        <div class="card gold-border" style="margin-bottom:12px; cursor:pointer;" onclick="showDetailModal('tasks')">
+          <div style="display:flex; align-items:center; justify-content:space-between;">
+            <div>
+              <div style="font-size:13px; color:var(--gold); font-weight:600; margin-bottom:4px;">誓資任務實踐紀錄</div>
+              <div style="font-size:12px; color:var(--white-dim);">已完成 3 / 7 項任務</div>
+            </div>
+            <div style="color:var(--gold-dim); font-size:18px;">›</div>
+          </div>
+          <div class="progress-bar-wrap" style="margin-top:10px;">
+            <div class="progress-bar-fill" style="width:43%;"></div>
+          </div>
+        </div>
+
+        <!-- 誓資紀錄 -->
+        <div class="card gold-border" style="margin-bottom:12px; cursor:pointer;" onclick="showDetailModal('records')">
+          <div style="display:flex; align-items:center; justify-content:space-between;">
+            <div>
+              <div style="font-size:13px; color:var(--gold); font-weight:600; margin-bottom:4px;">誓資紀錄 × 回源願書</div>
+              <div style="font-size:12px; color:var(--white-dim);">不再入世 × 不入轉生</div>
+            </div>
+            <div style="color:var(--gold-dim); font-size:18px;">›</div>
+          </div>
+        </div>
+
+        <!-- 天庫金脈 -->
+        <div class="card gold-border" style="margin-bottom:12px; cursor:pointer;" onclick="showDetailModal('gold-vein')">
+          <div style="display:flex; align-items:center; justify-content:space-between;">
+            <div>
+              <div style="font-size:13px; color:var(--gold); font-weight:600; margin-bottom:4px;">天庫金脈 × 支脈顯化狀態</div>
+              <div style="display:flex; gap:8px; margin-top:4px;">
+                <span class="badge badge-gold">主脈：連通</span>
+                <span class="badge badge-cyan">支脈：顯化中</span>
+              </div>
+            </div>
+            <div style="color:var(--gold-dim); font-size:18px;">›</div>
+          </div>
+        </div>
+
+        <!-- 時間戳 -->
+        <div class="card" style="margin-bottom:12px; background:rgba(26,10,46,0.5); border:1px solid rgba(255,255,255,0.08);">
+          <div style="font-size:12px; color:var(--gold-dim); margin-bottom:4px;">狀態更新時間戳</div>
+          <div style="font-size:13px; color:var(--white-dim); font-family:var(--font-mono);">${new Date().toLocaleString('zh-TW')}</div>
+        </div>
+
+        <!-- 密鑰對頻歷程摘要 -->
+        <div class="card gold-border" style="cursor:pointer;" onclick="showDetailModal('key-history')">
+          <div style="display:flex; align-items:center; justify-content:space-between;">
+            <div>
+              <div style="font-size:13px; color:var(--gold); font-weight:600; margin-bottom:4px;">開啟誓魂密鑰對頻歷程摘要</div>
+              <div style="font-size:12px; color:var(--white-dim);">查看完整對頻歷程記錄</div>
+            </div>
+            <div style="color:var(--gold-dim); font-size:18px;">›</div>
+          </div>
+        </div>
+      </div>
+    </div>`;
+}
+
+function showSealDetail(index) {
+  const seal = AppState.seals[index];
+  const status = AppState.sealStatus[index];
+  const statusLabel = { passed: '已通過', active: '進行中', pending: '未啟動' }[status];
+  const statusColor = { passed: 'var(--green-ok)', active: 'var(--gold)', pending: 'var(--white-dim)' }[status];
+
+  showModal(`
+    <div>
+      <div class="modal-title">${seal.num}：${seal.name}</div>
+      <div class="divider divider-glow"></div>
+      <div style="text-align:center; margin:16px 0;">
+        <div style="font-size:48px; color:${statusColor}; font-weight:900; margin-bottom:8px;">${index+1}</div>
+        <span class="badge ${status==='passed'?'badge-green':status==='active'?'badge-gold':'badge-gray'}">${statusLabel}</span>
+      </div>
+      <div style="font-size:14px; color:var(--white-dim); line-height:1.8; margin-bottom:16px; text-align:center;">${seal.desc}</div>
+      ${status === 'active' ? `
+      <div style="margin-bottom:16px;">
+        <div style="font-size:12px; color:var(--gold-dim); margin-bottom:6px;">當前進度</div>
+        <div class="progress-bar-wrap" style="height:8px;">
+          <div class="progress-bar-fill" style="width:45%;"></div>
+        </div>
+        <div style="text-align:right; font-size:11px; color:var(--gold-dim); margin-top:4px;">45%</div>
+      </div>` : ''}
+      <div style="padding:12px; background:rgba(212,175,55,0.05); border-radius:6px; border:1px solid var(--gold-dim); font-size:13px; color:var(--white-dim); line-height:1.8; margin-bottom:16px;">
+        此印階為七印誓網覺醒工程之重要節點，完成後將解鎖下一階段誓印功能，並記錄於九界冊籍之中。
+      </div>
+      <button class="btn btn-gold btn-full" onclick="closeModal()">確認</button>
+    </div>`);
+}
+
+function showDetailModal(type) {
+  const details = {
+    'key-freq': {
+      title: '誓魂密鑰對頻總判定',
+      content: `<div style="line-height:2; font-size:14px; color:var(--white-dim);">
+        <div style="display:flex; justify-content:space-between; padding:8px 0; border-bottom:1px solid rgba(212,175,55,0.1);">
+          <span style="color:var(--gold-dim);">對頻狀態</span>
+          <span class="badge badge-green">通過</span>
+        </div>
+        <div style="display:flex; justify-content:space-between; padding:8px 0; border-bottom:1px solid rgba(212,175,55,0.1);">
+          <span style="color:var(--gold-dim);">密鑰等級</span>
+          <span style="color:var(--gold);">主頻密鑰 Lv.3</span>
+        </div>
+        <div style="display:flex; justify-content:space-between; padding:8px 0; border-bottom:1px solid rgba(212,175,55,0.1);">
+          <span style="color:var(--gold-dim);">對頻時間</span>
+          <span>${new Date().toLocaleString('zh-TW')}</span>
+        </div>
+        <div style="display:flex; justify-content:space-between; padding:8px 0;">
+          <span style="color:var(--gold-dim);">有效期限</span>
+          <span style="color:var(--green-ok);">永久有效</span>
+        </div>
+      </div>`
+    },
+    'tasks': {
+      title: '誓資任務實踐紀錄',
+      content: `<div style="display:flex; flex-direction:column; gap:8px; font-size:13px;">
+        ${['每日誦讀誓文三遍', '完成消業冥想練習', '提交誓資實踐報告', '參與光網同步儀式', '完成誓魂淨化練習', '提交覺醒心得記錄', '完成七印總覺醒儀式']
+          .map((task, i) => `
+          <div style="display:flex; align-items:center; gap:10px; padding:10px; background:rgba(212,175,55,0.04); border-radius:4px; border:1px solid ${i<3?'rgba(68,255,136,0.3)':'rgba(255,255,255,0.1)'};">
+            <span style="color:${i<3?'var(--green-ok)':'var(--white-dim)'}; font-size:16px;">${i<3?'✓':'○'}</span>
+            <span style="color:${i<3?'var(--white)':'var(--white-dim)'};">${task}</span>
+          </div>`).join('')}
+      </div>`
+    },
+    'key-history': {
+      title: '誓魂密鑰對頻歷程摘要',
+      content: `<div style="display:flex; flex-direction:column; gap:8px; font-size:12px; color:var(--white-dim);">
+        ${[
+          { time: '2024-06-21 09:00', event: '初次密鑰對頻成功', status: 'ok' },
+          { time: '2024-06-20 15:30', event: '七印系統同步完成', status: 'ok' },
+          { time: '2024-06-19 12:00', event: '母源印驗證通過', status: 'ok' },
+          { time: '2024-06-18 08:00', event: '購書序號綁定完成', status: 'ok' },
+          { time: '2024-06-17 20:00', event: '誓魂初始化完成', status: 'ok' }
+        ].map(h => `
+          <div style="display:flex; gap:10px; padding:10px; background:rgba(212,175,55,0.04); border-radius:4px; border-left:2px solid var(--green-ok);">
+            <div style="flex:1;">
+              <div style="color:var(--white); margin-bottom:2px;">${h.event}</div>
+              <div style="font-family:var(--font-mono); color:var(--gold-dim);">${h.time}</div>
+            </div>
+            <span style="color:var(--green-ok);">✓</span>
+          </div>`).join('')}
+      </div>`
+    }
+  };
+
+  const d = details[type] || { title: '詳細資訊', content: '<div style="color:var(--white-dim); font-size:14px; text-align:center; padding:20px;">此功能正在建置中，敬請期待。</div>' };
+
+  showModal(`
+    <div>
+      <div class="modal-title">${d.title}</div>
+      <div class="divider divider-glow"></div>
+      <div style="margin:16px 0;">${d.content}</div>
+      <button class="btn btn-gold btn-full" onclick="closeModal()">關閉</button>
+    </div>`, () => {});
+}
+
+// ===== 頁籤二：誓文資料庫 =====
+const SEAL_TEXTS = [
+  {
+    name: '消業印', num: '第一印',
+    text: `吾以誓魂之力，消除一切業障，\n清淨身心靈之根基，\n以光明之意志，斬斷輪迴之鎖，\n業力消融，誓魂重生。\n天地為鑑，光網為證，\n消業印，啟！`
+  },
+  {
+    name: '修心印', num: '第二印',
+    text: `吾以誓魂之力，修煉心性之本，\n以定靜之心，觀照萬象，\n心如明鏡，映照宇宙真理，\n修心印，啟！\n天地為鑑，光網為證。`
+  },
+  {
+    name: '守願印', num: '第三印',
+    text: `吾以誓魂之力，守護誓願之根，\n以堅定之志，守護光明使命，\n願力如山，永不動搖，\n守願印，啟！\n天地為鑑，光網為證。`
+  },
+  {
+    name: '誓令印', num: '第四印',
+    text: `吾以誓魂之力，確立誓令之基，\n以宇宙律法，立誓魂使命，\n誓令如鐵，永恆不變，\n誓令印，啟！\n天地為鑑，光網為證。`
+  },
+  {
+    name: '覺醒印', num: '第五印',
+    text: `吾以誓魂之力，全面覺醒本質，\n以光明之識，洞見宇宙真相，\n誓魂覺醒，本質顯化，\n覺醒印，啟！\n天地為鑑，光網為證。\n入世誓約，此刻揭示。`
+  },
+  {
+    name: '誥徒誓印', num: '第六印',
+    text: `吾以誓魂之力，誥授誓徒之位，\n以傳承之責，延續光明法脈，\n誥徒誓印，傳承永續，\n誥徒誓印，啟！\n天地為鑑，光網為證。`
+  },
+  {
+    name: '鳳徽印', num: '第七印',
+    text: `吾以誓魂之力，圓滿七印之程，\n以鳳徽之印，封冊歸源，\n七印圓滿，誓魂歸源，\n鳳徽印，啟！\n圓印封冊，天地永證。\n天地為鑑，光網為證。`
+  }
+];
+
+function renderTab1(container) {
+  container.innerHTML = `
+    <div style="padding:20px 16px 100px;">
+      <div style="display:flex; align-items:center; gap:10px; margin-bottom:20px;">
+        <div style="width:3px; height:20px; background:var(--gold); border-radius:2px;"></div>
+        <div style="font-size:15px; font-weight:700; color:var(--gold); letter-spacing:2px;">七印完整誓文</div>
+      </div>
+
+      <div style="font-size:12px; color:var(--white-dim); margin-bottom:16px; padding:10px; background:rgba(212,175,55,0.04); border-radius:4px; border-left:2px solid var(--gold-dim);">
+        以下誓文為七印誓網覺醒工程之核心誓文，每一印均可獨立展開查看與誦讀。
+      </div>
+
+      <div id="seal-accordion" style="display:flex; flex-direction:column; gap:10px;">
+        ${SEAL_TEXTS.map((s, i) => `
+          <div class="card gold-border" style="overflow:hidden;">
+            <div style="display:flex; align-items:center; justify-content:space-between; cursor:pointer; padding:0;" onclick="toggleAccordion(${i})">
+              <div style="display:flex; align-items:center; gap:12px;">
+                <div style="
+                  width:36px; height:36px; border-radius:50%;
+                  background:${AppState.sealStatus[i]==='passed'?'rgba(68,255,136,0.1)':AppState.sealStatus[i]==='active'?'rgba(212,175,55,0.1)':'rgba(255,255,255,0.04)'};
+                  border:2px solid ${AppState.sealStatus[i]==='passed'?'var(--green-ok)':AppState.sealStatus[i]==='active'?'var(--gold)':'rgba(255,255,255,0.2)'};
+                  display:flex; align-items:center; justify-content:center;
+                  font-size:14px; font-weight:700;
+                  color:${AppState.sealStatus[i]==='passed'?'var(--green-ok)':AppState.sealStatus[i]==='active'?'var(--gold)':'var(--white-dim)'};
+                  flex-shrink:0;
+                ">${i+1}</div>
+                <div>
+                  <div style="font-size:11px; color:var(--gold-dim);">${s.num}</div>
+                  <div style="font-size:15px; font-weight:600; color:var(--white);">${s.name}</div>
+                </div>
+              </div>
+              <div id="accordion-arrow-${i}" style="color:var(--gold-dim); font-size:18px; transition:transform 0.3s;">›</div>
+            </div>
+            <div id="accordion-content-${i}" style="display:none; margin-top:16px;">
+              <div class="divider"></div>
+              <div style="
+                padding:16px;
+                background:rgba(212,175,55,0.04);
+                border-radius:6px;
+                font-size:14px; color:var(--gold-light);
+                line-height:2.2; letter-spacing:1px;
+                white-space:pre-line;
+                border-left:3px solid var(--gold-dim);
+                margin-bottom:12px;
+              ">${s.text}</div>
+              <div style="display:flex; gap:8px;">
+                <button class="btn btn-outline btn-sm" onclick="copyText(\`${s.text.replace(/`/g,'\\`')}\`)">複製誓文</button>
+                <button class="btn btn-purple btn-sm" onclick="editSealText(${i})">編輯誓文</button>
+              </div>
+            </div>
+          </div>`).join('')}
+      </div>
+    </div>`;
+}
+
+function toggleAccordion(i) {
+  const content = document.getElementById(`accordion-content-${i}`);
+  const arrow = document.getElementById(`accordion-arrow-${i}`);
+  const isOpen = content.style.display !== 'none';
+  content.style.display = isOpen ? 'none' : 'block';
+  arrow.style.transform = isOpen ? '' : 'rotate(90deg)';
+}
+
+function copyText(text) {
+  navigator.clipboard.writeText(text).then(() => showToast('✓ 誓文已複製')).catch(() => showToast('複製失敗，請手動複製'));
+}
+
+function editSealText(i) {
+  const seal = SEAL_TEXTS[i];
+  showModal(`
+    <div>
+      <div class="modal-title">編輯 ${seal.num}：${seal.name}</div>
+      <div class="divider divider-glow"></div>
+      <div style="margin:16px 0;">
+        <textarea id="edit-text" style="
+          width:100%; min-height:160px;
+          background:rgba(45,27,94,0.6);
+          border:1px solid var(--gold-dim); border-radius:4px;
+          color:var(--white); font-family:var(--font-main); font-size:14px;
+          padding:12px; resize:vertical; outline:none; line-height:1.8;
+        ">${seal.text}</textarea>
+      </div>
+      <div style="display:flex; gap:8px;">
+        <button class="btn btn-gold" style="flex:1;" onclick="saveEditText(${i})">儲存</button>
+        <button class="btn btn-outline" style="flex:1;" onclick="closeModal()">取消</button>
+      </div>
+    </div>`, () => {});
+}
+
+function saveEditText(i) {
+  const newText = document.getElementById('edit-text').value;
+  SEAL_TEXTS[i].text = newText;
+  closeModal();
+  showToast('✓ 誓文已更新');
+  renderTab(1);
+}
+
+// ===== 頁籤三：誓資狀態 =====
+function renderTab2(container) {
+  container.innerHTML = `
+    <div style="padding:20px 16px 100px;">
+      <div style="display:flex; align-items:center; gap:10px; margin-bottom:20px;">
+        <div style="width:3px; height:20px; background:var(--gold); border-radius:2px;"></div>
+        <div style="font-size:15px; font-weight:700; color:var(--gold); letter-spacing:2px;">誓資狀態總覽</div>
+      </div>
+
+      <!-- 天庫金脈連線狀態 -->
+      <div class="card gold-border-glow" style="margin-bottom:16px; position:relative; overflow:hidden;">
+        <div style="position:absolute; top:0; left:0; right:0; height:2px; background:linear-gradient(90deg, transparent, var(--gold), transparent); animation:pulse 2s infinite;"></div>
+        <div style="font-size:13px; color:var(--gold-dim); margin-bottom:12px; letter-spacing:2px;">◈ 天庫金脈連線狀態</div>
+        <div style="display:flex; align-items:center; gap:12px; margin-bottom:12px;">
+          <div style="
+            width:48px; height:48px; border-radius:50%;
+            background:rgba(68,255,136,0.1);
+            border:2px solid var(--green-ok);
+            display:flex; align-items:center; justify-content:center;
+            font-size:20px;
+            box-shadow:0 0 15px rgba(68,255,136,0.3);
+            animation:pulseGlow 2s infinite;
+          ">◉</div>
+          <div>
+            <div style="font-size:18px; font-weight:700; color:var(--green-ok);">連線中</div>
+            <div style="font-size:12px; color:var(--white-dim);">天庫金脈主頻穩定連接</div>
+          </div>
+          <div style="margin-left:auto; text-align:right;">
+            <div style="font-size:11px; color:var(--gold-dim);">延遲</div>
+            <div style="font-size:14px; color:var(--cyan); font-family:var(--font-mono);">12ms</div>
+          </div>
+        </div>
+        <div style="display:grid; grid-template-columns:1fr 1fr 1fr; gap:8px;">
+          <div style="padding:8px; background:rgba(68,255,136,0.05); border-radius:4px; text-align:center; border:1px solid rgba(68,255,136,0.2);">
+            <div style="font-size:10px; color:var(--gold-dim);">主頻</div>
+            <div style="font-size:13px; color:var(--green-ok);">穩定</div>
+          </div>
+          <div style="padding:8px; background:rgba(68,255,136,0.05); border-radius:4px; text-align:center; border:1px solid rgba(68,255,136,0.2);">
+            <div style="font-size:10px; color:var(--gold-dim);">光網</div>
+            <div style="font-size:13px; color:var(--green-ok);">鎖定</div>
+          </div>
+          <div style="padding:8px; background:rgba(68,255,136,0.05); border-radius:4px; text-align:center; border:1px solid rgba(68,255,136,0.2);">
+            <div style="font-size:10px; color:var(--gold-dim);">同步</div>
+            <div style="font-size:13px; color:var(--green-ok);">完成</div>
+          </div>
+        </div>
+      </div>
+
+      <!-- 撥補通道 -->
+      <div class="card gold-border" style="margin-bottom:16px;">
+        <div style="font-size:13px; color:var(--gold-dim); margin-bottom:12px; letter-spacing:2px;">◈ 撥補通道狀態</div>
+        <div style="display:flex; align-items:center; justify-content:space-between; margin-bottom:12px;">
+          <div style="display:flex; align-items:center; gap:10px;">
+            <span class="status-dot active"></span>
+            <span style="font-size:15px; font-weight:600; color:var(--green-ok);">撥補通道已開啟</span>
+          </div>
+          <div class="badge badge-green">運作中</div>
+        </div>
+        <div style="display:flex; flex-direction:column; gap:8px;">
+          <div style="display:flex; justify-content:space-between; padding:8px; background:rgba(212,175,55,0.04); border-radius:4px;">
+            <span style="font-size:13px; color:var(--white-dim);">主撥補通道</span>
+            <span class="badge badge-green">開啟</span>
+          </div>
+          <div style="display:flex; justify-content:space-between; padding:8px; background:rgba(212,175,55,0.04); border-radius:4px;">
+            <span style="font-size:13px; color:var(--white-dim);">副撥補通道</span>
+            <span class="badge badge-gold">待機</span>
+          </div>
+          <div style="display:flex; justify-content:space-between; padding:8px; background:rgba(212,175,55,0.04); border-radius:4px;">
+            <span style="font-size:13px; color:var(--white-dim);">緊急撥補通道</span>
+            <span class="badge badge-gray">備用</span>
+          </div>
+        </div>
+      </div>
+
+      <!-- 誓資總量 -->
+      <div class="card gold-border" style="margin-bottom:16px;">
+        <div style="font-size:13px; color:var(--gold-dim); margin-bottom:16px; letter-spacing:2px;">◈ 誓資總量</div>
+        <div style="text-align:center; margin-bottom:16px;">
+          <div style="font-size:48px; font-weight:900; color:var(--gold); text-shadow:0 0 20px rgba(212,175,55,0.5); font-family:var(--font-mono);">8,888</div>
+          <div style="font-size:14px; color:var(--gold-dim); letter-spacing:2px;">誓資單位</div>
+        </div>
+        <div class="progress-bar-wrap" style="height:10px; margin-bottom:8px;">
+          <div class="progress-bar-fill" style="width:72%;"></div>
+        </div>
+        <div style="display:flex; justify-content:space-between; font-size:12px; color:var(--white-dim);">
+          <span>目標：12,000</span>
+          <span style="color:var(--gold);">72% 達成</span>
+        </div>
+      </div>
+
+      <!-- 願力強度 -->
+      <div class="card gold-border" style="margin-bottom:16px;">
+        <div style="font-size:13px; color:var(--gold-dim); margin-bottom:16px; letter-spacing:2px;">◈ 願力強度數值</div>
+        <div style="display:grid; grid-template-columns:1fr 1fr; gap:12px;">
+          ${[
+            { label: '誓願強度', value: '9,240', unit: '願力值', color: 'var(--gold)', pct: 77 },
+            { label: '光網共鳴', value: '7,830', unit: '共鳴值', color: 'var(--cyan)', pct: 65 },
+            { label: '業力消融', value: '5,120', unit: '消融值', color: 'var(--green-ok)', pct: 43 },
+            { label: '覺醒指數', value: '6,800', unit: '覺醒值', color: '#FF88FF', pct: 57 }
+          ].map(item => `
+            <div style="padding:12px; background:rgba(212,175,55,0.04); border-radius:6px; border:1px solid rgba(212,175,55,0.15);">
+              <div style="font-size:11px; color:var(--gold-dim); margin-bottom:4px;">${item.label}</div>
+              <div style="font-size:20px; font-weight:700; color:${item.color}; font-family:var(--font-mono);">${item.value}</div>
+              <div style="font-size:10px; color:var(--white-dim); margin-bottom:6px;">${item.unit}</div>
+              <div class="progress-bar-wrap" style="height:4px;">
+                <div style="height:100%; width:${item.pct}%; background:${item.color}; border-radius:2px; box-shadow:0 0 6px ${item.color};"></div>
+              </div>
+            </div>`).join('')}
+        </div>
+      </div>
+
+      <!-- 最後同步時間 -->
+      <div class="card" style="background:rgba(26,10,46,0.5); border:1px solid rgba(255,255,255,0.08);">
+        <div style="display:flex; justify-content:space-between; align-items:center;">
+          <div style="font-size:12px; color:var(--gold-dim);">最後同步時間</div>
+          <div style="font-size:12px; color:var(--white-dim); font-family:var(--font-mono);">${new Date().toLocaleString('zh-TW')}</div>
+        </div>
+        <div style="margin-top:8px;">
+          <button class="btn btn-outline btn-sm btn-full" onclick="showToast('◉ 正在重新同步...')">重新同步</button>
+        </div>
+      </div>
+    </div>`;
+}
+
+// ===== 頁籤四：個人頁面 =====
+function renderTab3(container) {
+  container.innerHTML = `
+    <div style="padding:20px 16px 100px;">
+
+      <!-- 個人資料卡 -->
+      <div class="card gold-border-glow" style="margin-bottom:20px; text-align:center; padding:28px 20px; position:relative; overflow:hidden;">
+        <div style="position:absolute; inset:0; background:radial-gradient(ellipse at center top, rgba(212,175,55,0.08) 0%, transparent 60%);"></div>
+        <div style="
+          width:80px; height:80px; border-radius:50%;
+          background:linear-gradient(135deg, var(--purple-mid), var(--purple-light));
+          border:3px solid var(--gold);
+          display:flex; align-items:center; justify-content:center;
+          font-size:32px; margin:0 auto 16px;
+          box-shadow:0 0 25px rgba(212,175,55,0.4);
+          animation:pulseGlow 3s infinite;
+        ">✦</div>
+        <div style="font-size:22px; font-weight:700; color:var(--white); letter-spacing:2px; margin-bottom:4px;">${AppState.userName}</div>
+        <div style="font-size:14px; color:var(--gold); margin-bottom:8px; letter-spacing:2px;">誓名：${AppState.oathName}</div>
+        <div style="font-size:12px; color:var(--gold-dim); font-family:var(--font-mono); margin-bottom:12px;">識別碼：${AppState.uid}</div>
+        <div class="badge badge-gold" style="font-size:12px; padding:5px 14px;">◉ 誓印者 · 覺醒中</div>
+      </div>
+
+      <!-- 定位資訊 -->
+      <div style="display:flex; align-items:center; gap:10px; margin-bottom:16px;">
+        <div style="width:3px; height:20px; background:var(--gold); border-radius:2px;"></div>
+        <div style="font-size:15px; font-weight:700; color:var(--gold); letter-spacing:2px;">誓魂定位資訊</div>
+      </div>
+
+      <!-- 誓魂本族資訊 -->
+      <div class="card gold-border" style="margin-bottom:12px;">
+        <div style="font-size:12px; color:var(--gold-dim); margin-bottom:10px; letter-spacing:1px;">誓魂本族 × 天族姓脈 × 所屬靈脈支系 × 角色階級</div>
+        <div style="display:grid; grid-template-columns:1fr 1fr; gap:8px;">
+          <div style="padding:10px; background:rgba(212,175,55,0.05); border-radius:4px;">
+            <div style="font-size:11px; color:var(--gold-dim);">誓魂本族</div>
+            <div style="font-size:14px; color:var(--white); font-weight:500; margin-top:2px;">光明天族</div>
+          </div>
+          <div style="padding:10px; background:rgba(212,175,55,0.05); border-radius:4px;">
+            <div style="font-size:11px; color:var(--gold-dim);">天族姓脈</div>
+            <div style="font-size:14px; color:var(--white); font-weight:500; margin-top:2px;">鳳凰姓脈</div>
+          </div>
+          <div style="padding:10px; background:rgba(212,175,55,0.05); border-radius:4px;">
+            <div style="font-size:11px; color:var(--gold-dim);">所屬靈脈支系</div>
+            <div style="font-size:14px; color:var(--white); font-weight:500; margin-top:2px;">金光支系</div>
+          </div>
+          <div style="padding:10px; background:rgba(212,175,55,0.05); border-radius:4px;">
+            <div style="font-size:11px; color:var(--gold-dim);">角色階級</div>
+            <div style="font-size:14px; color:var(--gold); font-weight:700; margin-top:2px;">覺醒誓徒</div>
+          </div>
+        </div>
+      </div>
+
+      <!-- 宇宙位標 -->
+      <div class="card gold-border" style="margin-bottom:12px;">
+        <div style="font-size:12px; color:var(--gold-dim); margin-bottom:10px; letter-spacing:1px;">誓魂宇宙總位標 × 維度階級 × 三界層域 × 階識</div>
+        <div style="display:grid; grid-template-columns:1fr 1fr; gap:8px;">
+          <div style="padding:10px; background:rgba(0,229,255,0.05); border-radius:4px; border:1px solid rgba(0,229,255,0.15);">
+            <div style="font-size:11px; color:var(--gold-dim);">宇宙總位標</div>
+            <div style="font-size:13px; color:var(--cyan); font-family:var(--font-mono); margin-top:2px;">Ω-7-Φ-3-Λ</div>
+          </div>
+          <div style="padding:10px; background:rgba(0,229,255,0.05); border-radius:4px; border:1px solid rgba(0,229,255,0.15);">
+            <div style="font-size:11px; color:var(--gold-dim);">維度階級</div>
+            <div style="font-size:14px; color:var(--cyan); font-weight:500; margin-top:2px;">第七維度</div>
+          </div>
+          <div style="padding:10px; background:rgba(0,229,255,0.05); border-radius:4px; border:1px solid rgba(0,229,255,0.15);">
+            <div style="font-size:11px; color:var(--gold-dim);">三界層域</div>
+            <div style="font-size:14px; color:var(--cyan); font-weight:500; margin-top:2px;">天界上層</div>
+          </div>
+          <div style="padding:10px; background:rgba(0,229,255,0.05); border-radius:4px; border:1px solid rgba(0,229,255,0.15);">
+            <div style="font-size:11px; color:var(--gold-dim);">階識</div>
+            <div style="font-size:14px; color:var(--cyan); font-weight:500; margin-top:2px;">覺醒階識 III</div>
+          </div>
+        </div>
+      </div>
+
+      <!-- 當前印階 -->
+      <div class="card gold-border-glow" style="margin-bottom:16px;">
+        <div style="font-size:13px; color:var(--gold-dim); margin-bottom:12px; letter-spacing:2px;">◈ 當前所在印階</div>
+        <div style="display:flex; align-items:center; gap:14px;">
+          <div style="
+            width:52px; height:52px; border-radius:50%;
+            background:rgba(212,175,55,0.1);
+            border:2px solid var(--gold);
+            display:flex; align-items:center; justify-content:center;
+            font-size:20px; font-weight:900; color:var(--gold);
+            box-shadow:0 0 20px rgba(212,175,55,0.4);
+            animation:pulseGlow 2s infinite;
+          ">2</div>
+          <div>
+            <div style="font-size:11px; color:var(--gold-dim);">第二印</div>
+            <div style="font-size:20px; font-weight:700; color:var(--white);">修心印</div>
+            <div style="font-size:12px; color:var(--white-dim);">修煉心性，強化誓魂意志</div>
+          </div>
+          <div style="margin-left:auto;">
+            <span class="badge badge-gold">進行中</span>
+          </div>
+        </div>
+        <div style="margin-top:12px;">
+          <div class="progress-bar-wrap" style="height:8px;">
+            <div class="progress-bar-fill" style="width:45%;"></div>
+          </div>
+          <div style="display:flex; justify-content:space-between; font-size:11px; color:var(--gold-dim); margin-top:4px;">
+            <span>進度 45%</span>
+            <span>目標：100%</span>
+          </div>
+        </div>
+      </div>
+
+      <!-- 設定按鈕 -->
+      <div style="display:flex; flex-direction:column; gap:8px;">
+        <button class="btn btn-outline btn-full" onclick="showToast('◉ 個人資料編輯功能建置中')">
+          編輯個人資料
+        </button>
+        <button class="btn btn-purple btn-full" onclick="showToast('◉ 誓印記錄匯出功能建置中')">
+          匯出誓印記錄
+        </button>
+        <button class="btn btn-outline btn-full" style="border-color:var(--red-err); color:var(--red-err);" onclick="confirmLogout()">
+          退出系統
+        </button>
+      </div>
+    </div>`;
+}
+
+function confirmLogout() {
+  show
+Modal(`
+    <div>
+      <div class="modal-title" style="color:var(--red-err);">⚠ 確認退出</div>
+      <div class="divider"></div>
+      <div style="font-size:14px; color:var(--white-dim); text-align:center; margin:16px 0; line-height:1.8;">
+        確定要退出七印誓網主系統嗎？<br>誓印記錄將保留，下次登入可繼續。
+      </div>
+      <div style="display:flex; gap:8px;">
+        <button class="btn btn-outline" style="flex:1; border-color:var(--red-err); color:var(--red-err);" onclick="doLogout()">確認退出</button>
+        <button class="btn btn-gold" style="flex:1;" onclick="closeModal()">取消</button>
+      </div>
+    </div>`, () => {});
+}
+
+function doLogout() {
+  closeModal();
+  document.getElementById('phase-main').classList.add('hidden');
+  document.getElementById('phase-launch').classList.remove('hidden');
+  document.getElementById('phase-launch').style.display = 'flex';
+  AppState.currentStep = 1;
+  AppState.qrScanned = false;
+  AppState.oathRead = false;
+  AppState.isbnVerified = false;
+  renderLaunchPhase();
+  showToast('已退出系統');
+}
+
+// ============================================================
+// 初始化
+// ============================================================
+document.addEventListener('DOMContentLoaded', function() {
+  renderLaunchPhase();
+});
+</script>
+</body>
+</html>
