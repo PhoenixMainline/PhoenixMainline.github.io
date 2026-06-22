@@ -681,14 +681,25 @@ function renderStep1(container) {
               </div>
             </label>
           </div>
-    function startQRScanner() {
+  <script src="https://unpkg.com/html5-qrcode"></script>
+<script>
+var html5QrCode = null;
+
+function handleQRScan() {
+  if (/Mobi|Android|iPhone|iPad|iPod/i.test(navigator.userAgent)) {
+    startQRScanner();
+  } else {
+    alert('📲 請使用手機掃描 QR Code');
+  }
+}
+
+function startQRScanner() {
   var readerContainer = document.getElementById('qr-reader');
   var resultContainer = document.getElementById('qr-result');
   var decodedContainer = document.getElementById('qr-decoded-result');
   var stopBtn = document.getElementById('stopScanBtn');
   var scanBtn = document.getElementById('scanBtn');
 
-  // 顯示掃描框，隱藏按鈕
   readerContainer.style.display = 'block';
   resultContainer.style.display = 'block';
   resultContainer.innerHTML = '⏳ 正在開啟相機...';
@@ -696,14 +707,12 @@ function renderStep1(container) {
   scanBtn.style.display = 'none';
   stopBtn.style.display = 'block';
 
-  // 初始化掃描器
   html5QrCode = new Html5Qrcode("qr-reader");
 
   html5QrCode.start(
     { facingMode: "environment" },
     { fps: 10, qrbox: { width: 250, height: 250 } },
     function(decodedText, decodedResult) {
-      // ✅ 掃描成功
       resultContainer.innerHTML = '✅ 掃描成功！';
       resultContainer.style.color = 'var(--green-ok)';
 
@@ -717,30 +726,46 @@ function renderStep1(container) {
       readerContainer.style.display = 'none';
       stopBtn.style.display = 'none';
 
-      // 🔥 呼叫 completeScan 傳遞 'book'
       completeScan('book');
     },
-    function(errorMessage) {
-      // 持續掃描中的錯誤（不用理會）
-    }
+    function(errorMessage) {}
   ).catch(function(err) {
-    // 相機無法開啟
     resultContainer.innerHTML = '❌ 無法開啟相機：' + err;
     resultContainer.style.color = 'var(--red-err)';
     scanBtn.style.display = 'block';
     stopBtn.style.display = 'none';
   });
 }
-}
-function checkStep1() {
-  const c1 = document.getElementById('check1').checked;
-  const c2 = document.getElementById('check2').checked;
-  if (!c1 || !c2) {
-    showToast('⚠ 請確認完成所有前置條件勾選');
-    return;
+
+function stopQRScanner() {
+  if (html5QrCode) {
+    html5QrCode.stop();
+    html5QrCode = null;
   }
-  goToStep(2);
+  document.getElementById('qr-reader').style.display = 'none';
+  document.getElementById('qr-result').style.display = 'block';
+  document.getElementById('qr-result').innerHTML = '🔴 已關閉掃描';
+  document.getElementById('qr-result').style.color = 'var(--gold-dim)';
+  document.getElementById('stopScanBtn').style.display = 'none';
+  document.getElementById('scanBtn').style.display = 'block';
 }
+
+function completeScan(type) {
+  if (type === 'book') {
+    const result = document.getElementById('qr-result');
+    if (result) { result.style.display = 'block'; }
+    showToast('✓ 掃描連通官方AI QR Code 掃描成功');
+  } else if (type === 'oath') {
+    const result = document.getElementById('oath-qr-result');
+    if (result) { result.style.display = 'block'; }
+    showToast('✓ 誓導 QR Code 掃描成功');
+  }
+}
+
+function showToast(message) {
+  alert(message);
+}
+</script>
 
 // ===== 步驟二：授權誓讀 =====
 function renderStep2(container) {
