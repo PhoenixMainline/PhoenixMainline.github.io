@@ -681,8 +681,24 @@ function renderStep1(container) {
               </div>
             </label>
           </div>
-       function startQRScanner() {
-  // ... 前面省略 ...
+    function startQRScanner() {
+  var readerContainer = document.getElementById('qr-reader');
+  var resultContainer = document.getElementById('qr-result');
+  var decodedContainer = document.getElementById('qr-decoded-result');
+  var stopBtn = document.getElementById('stopScanBtn');
+  var scanBtn = document.getElementById('scanBtn');
+
+  // 顯示掃描框，隱藏按鈕
+  readerContainer.style.display = 'block';
+  resultContainer.style.display = 'block';
+  resultContainer.innerHTML = '⏳ 正在開啟相機...';
+  resultContainer.style.color = 'var(--cyan)';
+  scanBtn.style.display = 'none';
+  stopBtn.style.display = 'block';
+
+  // 初始化掃描器
+  html5QrCode = new Html5Qrcode("qr-reader");
+
   html5QrCode.start(
     { facingMode: "environment" },
     { fps: 10, qrbox: { width: 250, height: 250 } },
@@ -701,13 +717,20 @@ function renderStep1(container) {
       readerContainer.style.display = 'none';
       stopBtn.style.display = 'none';
 
-      // 🔥 這裡呼叫 completeScan
+      // 🔥 呼叫 completeScan 傳遞 'book'
       completeScan('book');
     },
-    function(errorMessage) {}
+    function(errorMessage) {
+      // 持續掃描中的錯誤（不用理會）
+    }
   ).catch(function(err) {
-    // ... 錯誤處理 ...
+    // 相機無法開啟
+    resultContainer.innerHTML = '❌ 無法開啟相機：' + err;
+    resultContainer.style.color = 'var(--red-err)';
+    scanBtn.style.display = 'block';
+    stopBtn.style.display = 'none';
   });
+}
 }
 function checkStep1() {
   const c1 = document.getElementById('check1').checked;
