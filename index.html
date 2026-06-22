@@ -698,54 +698,46 @@ function renderStep1(container) {
               </div>
               <div class="scan-line"></div>
             </div>
-          </div>
-          <button class="btn btn-gold btn-full" onclick="simulateQRScan('book')">
-            ◉ 掃描書封底 QR Code
-          </button>
-          <div id="qr-result" style="margin-top:10px; text-align:center; font-size:13px; color:var(--green-ok); display:none;">
-            ✓ QR Code 掃描完成，書冊識別成功
-          </div>
-        </div>
+        <div class="card gold-border" style="margin-bottom:20px; animation: fadeInUp 0.6s ease 0.2s both;">
+  <div style="font-size:14px; color:var(--gold); font-weight:700; margin-bottom:14px; letter-spacing:2px;">
+    ◈ 掃描連通官方AI QR Code
+  </div>
 
-        <button class="btn btn-gold btn-full btn-lg" id="step1-next" onclick="checkStep1()" style="animation: fadeInUp 0.6s ease 0.3s both;">
-          進入下一步驟 →
-        </button>
-        <div style="text-align:center; margin-top:12px; font-size:12px; color:var(--gold-dim);">
-          步驟 1 / 5
+  <!-- 掃描提示區 -->
+  <div style="text-align:center; margin-bottom:16px;">
+    <div class="scan-frame">
+      <div class="scan-placeholder">
+        <div>
+          <div style="font-size:28px; margin-bottom:8px;">📷</div>
+          <div>掃描連通官方AI<br>QR Code</div>
         </div>
       </div>
-    </div>`;
+      <div class="scan-line"></div>
+    </div>
+  </div>
 
-  // 勾選框動態效果
-  ['check1','check2'].forEach(id => {
-    document.getElementById(id).addEventListener('change', function() {
-      this.closest('label').style.background = this.checked ? 'rgba(212,175,55,0.05)' : '';
-      this.closest('label').style.borderRadius = '4px';
-      this.closest('label').style.padding = this.checked ? '8px' : '';
-    });
-  });
-}
+  <!-- 掃描按鈕 -->
+  <button class="btn btn-gold btn-full" id="scanBtn" onclick="handleQRScan()">
+    ◉ 掃描連通官方AI QR Code
+  </button>
 
-function simulateQRScan(type) {
-  showModal(`
-    <div style="text-align:center;">
-      <div class="modal-title">◉ QR Code 掃描中</div>
-      <div class="scan-frame" style="margin:0 auto 20px;">
-        <div class="scan-placeholder">
-          <div>
-            <div style="font-size:28px; margin-bottom:8px;">📷</div>
-            <div style="font-size:12px;">模擬掃描中...</div>
-          </div>
-        </div>
-        <div class="scan-line"></div>
-      </div>
-      <div style="font-size:13px; color:var(--white-dim); margin-bottom:16px;">請將鏡頭對準 QR Code</div>
-      <button class="btn btn-gold btn-full" onclick="completeScan('${type}')">模擬掃描成功</button>
-      <button class="btn btn-outline btn-full" style="margin-top:8px;" onclick="closeModal()">取消</button>
-    </div>`);
-}
+  <!-- 掃描結果顯示區 -->
+  <div id="qr-result" style="margin-top:10px; text-align:center; font-size:13px; color:var(--green-ok); display:none;">
+    ✓ QR Code 掃描完成，書冊識別成功
+  </div>
 
-function completeScan(type) {
+  <!-- QR Code 掃描器容器（手機專用，預設隱藏） -->
+  <div id="qr-reader" style="width:100%; max-width:400px; margin:10px auto; display:none;"></div>
+
+  <!-- 停止掃描按鈕（掃描開始後才顯示） -->
+  <button id="stopScanBtn" onclick="stopQRScanner()" style="display:none; margin-top:8px; padding:8px 16px; border-radius:6px; border:1px solid var(--red-err); background:rgba(255,68,68,0.1); color:var(--red-err); cursor:pointer; width:100%;">
+    ❌ 關閉掃描
+  </button>
+
+  <!-- 掃描到的內容顯示 -->
+  <div id="qr-decoded-result" style="margin-top:10px; text-align:center; font-size:14px; color:var(--gold-light); display:none;"></div>
+</div>
+  function completeScan(type) {
   closeModal();
   if (type === 'book') {
     AppState.qrScanned = true;
